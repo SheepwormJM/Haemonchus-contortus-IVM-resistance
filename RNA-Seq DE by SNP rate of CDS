@@ -39,3 +39,7 @@ awk '{print $1 "\t" $3 "\t" $4 "\t" $5 "\t" $9 "\t" ($5 - $4) }' CDS.test.rna.se
 1       CDS     33344   33471   ID=g1.t1.CDS4;Parent=g1.t1      127
 1       CDS     34932   42323   ID=g2.t1.CDS1;Parent=g2.t1      7391
 
+
+# To get the gene number/name:
+## NEed to figure out how to remove all but the gene name..... 
+sed 's/ID=//g' length.CDS.test.rna.seq.gff3 > gene.length.CDS.test.rna.seq.gff3
