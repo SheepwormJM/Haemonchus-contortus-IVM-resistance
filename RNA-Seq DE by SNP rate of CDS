@@ -19,4 +19,15 @@
 # Use the gff3 file.
 # First extract the CDS lines only. 
 
-grep -E 'CDS' test.rna.seq.gff3 > CDS.test.rna.seq.gff3
+find . -name "test.rna.seq.gff3" | xargs grep -E 'CDS' > CDS.test.rna.seq.gff3
+
+# Get:
+1       AUGUSTUS        CDS     26045   26092   1       +       0       ID=g1.t1.CDS1;Parent=g1.t1
+1       AUGUSTUS        CDS     31478   31547   1       +       0       ID=g1.t1.CDS2;Parent=g1.t1
+1       AUGUSTUS        CDS     32624   32743   1       +       2       ID=g1.t1.CDS3;Parent=g1.t1
+1       AUGUSTUS        CDS     33344   33471   1       +       2       ID=g1.t1.CDS4;Parent=g1.t1
+1       AUGUSTUS        CDS     34932   42323   0.81    -       0       ID=g2.t1.CDS1;Parent=g2.t1
+
+# Therefore, to determine length of CDS do:
+
+awk 
