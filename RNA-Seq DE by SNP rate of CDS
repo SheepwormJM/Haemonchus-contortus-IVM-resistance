@@ -1,0 +1,22 @@
+# Based on paper by Rezansoff et al., 2019
+# https://www.sciencedirect.com/science/article/pii/S002075191930205X#!
+# The confounding effects of high genetic diversity on the determination and interpretation of differential gene expression analysis in the parasitic nematode Haemonchus contortus
+
+
+# First, to get WGS data and align to ISE genome
+
+
+
+# Next, to create an mpileup file of SNPs within CDS of genes
+
+
+
+# To determine the SNP rate per CDS
+# Want to have the total number of SNPs with AF >40% cf ref genome
+# And the total length of the CDS.
+
+# To get the total length of the CDS:
+# Use the gff3 file.
+# First extract the CDS lines only. 
+
+grep -E 'CDS' test.rna.seq.gff3 > CDS.test.rna.seq.gff3
