@@ -1,0 +1,133 @@
+# Based on paper by Rezansoff et al., 2019
+# https://www.sciencedirect.com/science/article/pii/S002075191930205X#!
+# The confounding effects of high genetic diversity on the determination and interpretation of differential gene expression analysis in the parasitic nematode Haemonchus contortus
+
+
+# First, to get WGS data and align to ISE genome
+
+
+
+# Next, to create an mpileup file of SNPs within CDS of genes
+
+
+
+# To determine the SNP rate per CDS
+# Want to have the total number of SNPs with AF >40% cf ref genome
+# And the total length of the CDS.
+
+# To get the total length of the CDS:
+# Use the gff3 file.
+
+##gff-version 3
+##sequence-region hcontortus_chr4_Celeg_TT_arrow_pilon 1 51826579
+# Gene gene:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       gene    7550    13746   .       -       .       ID=gene:HCON_00095840;Name=HCON_00095840;biotype=protein_coding;previous_stabl
+e_id=HCOI00362600
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       mRNA    7550    13746   .       -       .       ID=transcript:HCON_00095840;Parent=gene:HCON_00095840;Name=HCON_00095840;info=
+method:InterPro accession:IPR002189 description:F-actin-capping protein subunit alpha %0Amethod:InterPro accession:IPR017865 description:F-actin capping protein%2C alpha subunit%2C conserved
+ site %0Amethod:InterPro accession:IPR037282 description:F-actin-capping protein subunit alpha/beta
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       exon    13455   13746   .       -       .       ID=exon:HCON_00095840.1;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       exon    13259   13384   .       -       .       ID=exon:HCON_00095840.2;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       exon    11972   12133   .       -       .       ID=exon:HCON_00095840.3;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       exon    11792   11910   .       -       .       ID=exon:HCON_00095840.4;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       exon    11614   11701   .       -       .       ID=exon:HCON_00095840.5;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       exon    11474   11545   .       -       .       ID=exon:HCON_00095840.6;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       exon    11353   11418   .       -       .       ID=exon:HCON_00095840.7;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       exon    8221    8319    .       -       .       ID=exon:HCON_00095840.8;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       exon    7550    8072    .       -       .       ID=exon:HCON_00095840.9;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       five_prime_UTR  13545   13746   .       -       .       Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       CDS     13455   13544   .       -       0       ID=cds:HCON_00095840;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       CDS     13259   13384   .       -       0       ID=cds:HCON_00095840;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       CDS     11972   12133   .       -       0       ID=cds:HCON_00095840;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       CDS     11792   11910   .       -       0       ID=cds:HCON_00095840;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       CDS     11614   11701   .       -       1       ID=cds:HCON_00095840;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       CDS     11474   11545   .       -       0       ID=cds:HCON_00095840;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       CDS     11353   11418   .       -       0       ID=cds:HCON_00095840;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       CDS     8221    8319    .       -       0       ID=cds:HCON_00095840;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       CDS     8031    8072    .       -       0       ID=cds:HCON_00095840;Parent=transcript:HCON_00095840
+hcontortus_chr4_Celeg_TT_arrow_pilon    WormBase_imported       three_prime_UTR 7550    8030    .       -       .       Parent=transcript:HCON_00095840
+
+
+
+# First extract the CDS lines only. 
+# To get just the first transcript (.1). Note that the .gff3 file has the gene name alone if a single transcript, or with a .1 or .2 etc if more than one transcript.
+# Note that will need the same number of '.' as numbers in a gene name, with one extra!!
+
+find . -name "haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3" | xargs grep -E 'CDS' | grep -v 'ID=cds:HCON_.........[2-9]' > CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3
+
+# Get:
+1       AUGUSTUS        CDS     26045   26092   1       +       0       ID=g1.t1.CDS1;Parent=g1.t1
+1       AUGUSTUS        CDS     31478   31547   1       +       0       ID=g1.t1.CDS2;Parent=g1.t1
+1       AUGUSTUS        CDS     32624   32743   1       +       2       ID=g1.t1.CDS3;Parent=g1.t1
+1       AUGUSTUS        CDS     33344   33471   1       +       2       ID=g1.t1.CDS4;Parent=g1.t1
+1       AUGUSTUS        CDS     34932   42323   0.81    -       0       ID=g2.t1.CDS1;Parent=g2.t1
+
+# Therefore, to determine length of CDS do:
+
+awk '{print $1 "\t" $3 "\t" $4 "\t" $5 "\t" $9 "\t" ($5 - $4) }' CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3 > length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3
+
+# Get:
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     385466  385552  ID=cds:HCON_00096110;Parent=transcript:HCON_00096110    86
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     385613  385722  ID=cds:HCON_00096110;Parent=transcript:HCON_00096110    109
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     386728  386806  ID=cds:HCON_00096110;Parent=transcript:HCON_00096110    78
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     397197  397205  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        8
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     397005  397124  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        119
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     396590  396658  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        68
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     396385  396471  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        86
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     396232  396324  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        92
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     396084  396149  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        65
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     395918  396018  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        100
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     392795  392897  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        102
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     392477  392575  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        98
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     392180  392416  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        236
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     391160  391315  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        155
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     390960  391106  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        146
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     390783  390908  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        125
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     390600  390722  ID=cds:HCON_00096120.1;Parent=transcript:HCON_00096120.1        122
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     421861  423486  ID=cds:HCON_00096130;Parent=transcript:HCON_00096130    1625
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     423693  424364  ID=cds:HCON_00096140;Parent=transcript:HCON_00096140    671
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     424505  425713  ID=cds:HCON_00096150;Parent=transcript:HCON_00096150    1208
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     426378  427817  ID=cds:HCON_00096160;Parent=transcript:HCON_00096160    1439
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     428008  428325  ID=cds:HCON_00096170;Parent=transcript:HCON_00096170    317
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     444393  444518  ID=cds:HCON_00096180.1;Parent=transcript:HCON_00096180.1        125
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     444641  444772  ID=cds:HCON_00096180.1;Parent=transcript:HCON_00096180.1        131
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     444830  444928  ID=cds:HCON_00096180.1;Parent=transcript:HCON_00096180.1        98
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     445007  445105  ID=cds:HCON_00096180.1;Parent=transcript:HCON_00096180.1        98
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     445426  445566  ID=cds:HCON_00096180.1;Parent=transcript:HCON_00096180.1        140
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     446120  446234  ID=cds:HCON_00096190;Parent=transcript:HCON_00096190    114
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     446737  446809  ID=cds:HCON_00096190;Parent=transcript:HCON_00096190    72
+hcontortus_chr4_Celeg_TT_arrow_pilon    CDS     446878  446973  ID=cds:HCON_00096190;Parent=transcript:HCON_00096190    95
+
+
+# To get the gene number/name:
+## Need to figure out how to remove all but the gene name..... 
+# The first removes all but the gene name for genes with multiple transcripts, the second for genes with just one transcript.
+
+sed 's/ID=cds:HCON_..........;Parent=transcript://g' length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3 > Hcon_gene_name 
+sed 's/ID=cds:HCON_........;Parent=transcript://g' Hcon_gene_name > gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3
+
+# So now have the length of each exon in nucleotides. And the gene name for each gene associated with each exon. 
+
+# Now I want to sum the length of each gene.
+# Note, the following produces an array using the values in column 5 (the gene name) and summing the values in column 6 (the exon lengths). It also counts the number of exons and the output file contains: Gene name "\t" CDS length "\t" Total number of exons. 
+
+
+awk -F "\t" '{a[$5] += $6; ++c[$5]} END{for (i in a) print i, a[i], c[i]}' gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3 > SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3
+
+
+# The -F is the field separator. 
+
+# Get:
+
+HCON_00085240 473 1
+HCON_00117360 371 1
+HCON_00054120 694 8
+HCON_00078080 3052 26
+HCON_00073910 3070 29
+HCON_00023000 841 2
+HCON_00162390 1696 14
+HCON_00131270 906 3
+HCON_00129990 825 6
+HCON_00097870 687 3
+
+#Note, for some reason genes are not in same order as in the .gff3 file, but checked and seem to be ok with the answers!  
