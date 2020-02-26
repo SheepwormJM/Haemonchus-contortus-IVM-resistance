@@ -155,7 +155,48 @@ sed 's/_Celeg_TT_arrow_pilon//g' Hcon_chr_1 > Hcon_chr_2
 awk '{print $1 "\t" $3 "\t" $4 "\t" $2 "\t" $5 "\t" $6}' Hcon_chr_2  > gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.bed
 
 
-# Got sent an mpileup file of the XQTL parents from Dr. S. Doyle (WSI)
+# Got sent an mpileup file of the XQTL parents from Dr. S. Doyle (WSI). Note that UGA is first, ISE is second. Note that are sequenced from pools of 200 L3. 
 
 # Format: Chr, bp, ref nuc, #reads covering site, Read base relative to reference, Read base quality. 
+
+hcontortus_chr1_Celeg_TT_arrow_pilon    9       c       0       *       *       1       ^!.     /
+hcontortus_chr1_Celeg_TT_arrow_pilon    10      t       0       *       *       1       .       <
+hcontortus_chr1_Celeg_TT_arrow_pilon    11      a       0       *       *       1       .       B
+hcontortus_chr1_Celeg_TT_arrow_pilon    12      a       0       *       *       1       .       B
+hcontortus_chr1_Celeg_TT_arrow_pilon    13      g       0       *       *       1       .       B
+hcontortus_chr1_Celeg_TT_arrow_pilon    14      c       0       *       *       1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    15      c       0       *       *       1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    16      t       0       *       *       1       .       B
+hcontortus_chr1_Celeg_TT_arrow_pilon    17      a       1       ^!.     B       1       .       B
+hcontortus_chr1_Celeg_TT_arrow_pilon    18      a       1       .       B       1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    19      g       1       .       B       1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    20      c       1       .       B       1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    21      c       1       .       B       1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    22      t       1       .       F       1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    23      a       1       .       F       1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    24      a       1       .       F       1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    25      g       1       .       F       1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    26      c       1       .       F       1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    27      c       1       .       F       1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    28      t       2       .^*.    FB      1       .       <
+hcontortus_chr1_Celeg_TT_arrow_pilon    29      a       2       ..      FB      1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    30      a       2       ..      FB      1       .       F
+hcontortus_chr1_Celeg_TT_arrow_pilon    31      g       2       ..      FB      1       .       F
+
+
+# To calculate the mean read depth per site do:
+
+awk 'BEGIN{sum=0; counter=-1}{sum+=$4; counter+=1}END{print sum/counter}' XQTL_PARENTS.mpileup > mean.1.XQTL_PARENTS.mpileup
+awk 'BEGIN{sum=0; counter=-1}{sum+=$7; counter+=1}END{print sum/counter}' XQTL_PARENTS.mpileup > mean.2.XQTL_PARENTS.mpileup
+
+# To get only those sites that I am interested in: 
+
+awk $4 >  XQTL_PARENTS.pileup > depth_1_XQTL_PARENTS.mpileup
+awk $7 >  depth_1_XQTL_PARENTS.mpileup > depth_2_XQTL_PARENTS.mpileup
+
+# To make into a .bed file to extract the CDS:
+
+awk '{print $1 "\t" $2 "\t" ($2+1) "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9}' depth_2_XQTL_PARENTS.mpileup
+> bp2_depth_2_XQTL_PARENTS.mpileup
+
 
