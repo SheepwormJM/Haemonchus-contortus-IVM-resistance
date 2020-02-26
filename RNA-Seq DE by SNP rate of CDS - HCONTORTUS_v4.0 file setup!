@@ -18,6 +18,8 @@
 # To get the total length of the CDS:
 # Use the gff3 file.
 
+gunzip haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3.gz
+
 ##gff-version 3
 ##sequence-region hcontortus_chr4_Celeg_TT_arrow_pilon 1 51826579
 # Gene gene:HCON_00095840
@@ -131,3 +133,29 @@ HCON_00129990 825 6
 HCON_00097870 687 3
 
 #Note, for some reason genes are not in same order as in the .gff3 file, but checked and seem to be ok with the answers!  
+
+# However, need to get so that can make into a .bed file!! 
+# Need to get the first column to be just the chromosome to make into a .bed file
+
+sed 's/hcontortus_chr//g' gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3 > Hcon_chr_1 
+
+sed 's/_Celeg_TT_arrow_pilon//g' Hcon_chr_1 > Hcon_chr_2
+
+# Get:
+
+4       CDS     13455   13544   HCON_00095840   89
+4       CDS     13259   13384   HCON_00095840   125
+4       CDS     11972   12133   HCON_00095840   161
+4       CDS     11792   11910   HCON_00095840   118
+4       CDS     11614   11701   HCON_00095840   87
+4       CDS     11474   11545   HCON_00095840   71
+
+# To get to right format do:
+
+awk '{print $1 "\t" $3 "\t" $4 "\t" $2 "\t" $5 "\t" $6}' Hcon_chr_2  > gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.bed
+
+
+# Got sent an mpileup file of the XQTL parents from Dr. S. Doyle (WSI)
+
+# Format: Chr, bp, ref nuc, #reads covering site, Read base relative to reference, Read base quality. 
+
