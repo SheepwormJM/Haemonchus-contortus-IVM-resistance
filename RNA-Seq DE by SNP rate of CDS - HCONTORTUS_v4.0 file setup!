@@ -263,7 +263,7 @@ perl  /export/home/jmi45g/popoolation2_1201/indel_filtering/identify-indel-regio
 
 echo -e "
 perl /export/home/jmi45g/popoolation2_1201/indel_filtering/filter-sync-by-gtf.pl \
---input --input CDS_XQTL_PARENTS.mpileup2 \
+--input CDS_XQTL_PARENTS.mpileup2 \
 --gtf CDS_XQTL_PARENTS.mpileup2.indels.gtf \
 --output tmp.noindels.mpileup
 
