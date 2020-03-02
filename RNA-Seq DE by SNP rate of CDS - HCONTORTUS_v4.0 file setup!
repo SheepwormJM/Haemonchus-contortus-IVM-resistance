@@ -254,38 +254,22 @@ perl  /export/home/jmi45g/popoolation2_1201/indel_filtering/identify-indel-regio
 --input CDS_XQTL_PARENTS.mpileup2 \
 --output CDS_XQTL_PARENTS.mpileup2.indels.gtf
 
-# To then filter the basepairs around the indels (as these can have false SNPs due to poor alignment of reads in these positions (Schlotterer et al., 2014) - an alternative is to re-align the reads, as GATK does):
-
-#!/bin/sh
-#PBS -l walltime=50:00:00
-#PBS -l cput=50:00:00
-#PBS -l nodes=1:centos6
-
-echo -e "
-perl /export/home/jmi45g/popoolation2_1201/indel_filtering/filter-sync-by-gtf.pl \
---input CDS_XQTL_PARENTS.mpileup2 \
---gtf CDS_XQTL_PARENTS.mpileup2.indels.gtf \
---output tmp.noindels.mpileup
-
-fi
-touch step1_FINISHED" > step1_run_hcon
-
 # To sync the filtered mpileup file (discarding low quality bases):
 
-echo - e "
 java -ea -Xmx7g -jar /export/home/jmi45g/popoolation2_1201/mpileup2sync.jar \
---input tmp.noindels.mpileup \
+--input CDS_XQTL_PARENTS.mpileup2 \
 --output CDS_XQTL_PARENTS.java.sync \
 --fastq-type sanger \
 --min-qual 20 \
 --threads 8
 
-touch step2_FINISHED" > step2_run_hcon
+# To then filter the basepairs around the indels (as these can have false SNPs due to poor alignment of reads in these positions (Schlotterer et al., 2014) - an alternative is to re-align the reads, as GATK does):
 
-while [ ! -f step2_run_hcon ]
-do
-  sleep 2
-done
+perl /export/home/jmi45g/popoolation2_1201/indel_filtering/filter-sync-by-gtf.pl \
+--input CDS_XQTL_PARENTS.java.sync \
+--gtf CDS_XQTL_PARENTS.mpileup2.indels.gtf \
+--output CDS_XQTL_PARENTS.noindels.mpileup.sync
+
 
 # Allele frequencies, Fst values, Fishers Exact Tests and conversion of output
 # files into IGV format.
@@ -294,18 +278,10 @@ done
 # between populations:
 
 perl /export/home/jmi45g/popoolation2_1201/snp-frequency-diff.pl \
---input CDS_XQTL_PARENTS.java.sync \
+--input CDS_XQTL_PARENTS.noindels.mpileup.sync \
 --output-prefix CDS_XQTL_PARENTS. \
 --min-count 4 \
 --min-coverage 10 \
 --max-coverage 2%
-
-# Remove tmp files
-
-rm tmp*
-
-awk $4 >  XQTL_PARENTS.pileup > depth_1_XQTL_PARENTS.mpileup
-awk $7 >  depth_1_XQTL_PARENTS.mpileup > depth_2_XQTL_PARENTS.mpileup
-
 
 
