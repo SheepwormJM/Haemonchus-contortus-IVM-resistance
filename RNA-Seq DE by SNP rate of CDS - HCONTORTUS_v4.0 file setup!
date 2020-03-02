@@ -284,4 +284,79 @@ perl /export/home/jmi45g/popoolation2_1201/snp-frequency-diff.pl \
 --min-coverage 10 \
 --max-coverage 2%
 
+Result: '--max-coverage 2%' is equivalent to '--max-coverage 185,177'
+
+
+
+##chr   pos     rc      allele_count    allele_states   deletion_sum    snp_type        major_alleles(maa)      minor_alleles(mia)      maa_1   maa_2
+        mia_1   mia_2
+1       5851    A       2       A/G     0       pop     AA      GG      57/65   100/102 8/65    2/102
+1       5910    T       2       T/A     0       pop     TT      NA      86/86   86/106  0/86    20/106
+1       5916    A       2       A/T     0       pop     AA      TN      76/80   108/108 4/80    0/108
+1       5921    C       2       C/T     0       pop     CC      TG      74/83   114/115 9/83    1/115
+1       5930    C       2       C/T     0       pop     CC      NT      83/83   104/109 0/83    5/109
+1       6016    T       2       T/C     0       pop     TT      CC      77/83   91/96   6/83    5/96
+1       6022    A       2       A/G     0       pop     AA      GG      75/82   94/98   7/82    4/98
+1       6031    A       2       A/G     0       pop     AA      GG      40/76   56/87   36/76   31/87
+1       6040    G       2       G/A     0       pop     GG      AA      68/71   91/92   3/71    1/92
+1       6049    T       2       T/A     0       pop     TT      AA      73/75   87/89   2/75    2/89
+1       6216    T       2       T/C     0       pop     TT      CC      45/86   55/87   41/86   32/87
+1       6218    C       2       C/T     0       pop     CC      TT      76/85   85/87   9/85    2/87
+1       6224    G       2       G/A     0       pop     GG      AA      79/88   86/89   9/88    3/89
+1       6230    C       2       C/T     0       pop     CC      TT      74/83   83/86   9/83    3/86
+1       6245    C       2       C/T     0       pop     CC      AT      79/82   86/90   2/82    4/90
+1       6277    C       2       C/T     0       pop     CC      TT      79/88   96/100  9/88    4/100
+1       6287    C       2       C/T     0       pop     CC      NT      86/86   96/100  0/86    4/100
+1       6288    A       2       A/G     0       pop     AA      GN      84/90   104/104 6/90    0/104
+1       6885    T       2       C/T     0       rc|pop  CC      TT      59/70   90/95   11/70   5/95
+
+
+# To get only biallelic SNPs:
+
+awk '$4 == 2' CDS_XQTL_PARENTS._rc > biallelic_CDS_XQTL_PARENTS._rc
+
+# In R v3.1.2:
+# The file won't load as has missing elements per line... 
+# So to load adding this to the code: sep="\t", na.strings=""
+
+af<-read.table("biallelic_CDS_XQTL_PARENTS._rc", header=F, sep="\t", na.strings="")
+summary(af)
+
+
+# To make the major allele frequencies numerical and not factors...
+
+# So, first:
+af$<-as.character(af$V1)
+af$V1<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V1, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V1, perl=T) ) 
+
+af$V6<-as.character(af$V6)
+af$V6<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V6, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V6, perl=T) ) 
+
+af$V2<-as.character(af$V2)
+af$V2<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V2, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V2, perl=T) ) 
+
+af$V3<-as.character(af$V3)
+af$V3<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V3, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V3, perl=T) ) 
+
+af$V4<-as.character(af$V4)
+af$V4<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V4, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V4, perl=T) ) 
+
+af$V5<-as.character(af$V5)
+af$V5<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V5, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V5, perl=T) ) 
+
+summary(af)
+
+# To put headers on the columns....
+
+af$"Farm_2:Pre-Tx"<-af$V1
+af$"Farm_2:Post-IVM"<-af$V2
+
+af$"Farm_3:Pre-IVM:Rep_A"<-af$V3
+af$"Farm_3:Pre-IVM:Rep_B"<-af$V4
+
+af$"Farm_3:Post-IVM:Rep_A"<-af$V5
+af$"Farm_3:Post-IVM:Rep_B"<-af$V6
+
+af_b<-af
+af<-af_b[7:12]
 
