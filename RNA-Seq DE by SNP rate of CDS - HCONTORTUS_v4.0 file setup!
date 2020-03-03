@@ -323,40 +323,32 @@ af<-read.table("biallelic_CDS_XQTL_PARENTS._rc", header=F, sep="\t", na.strings=
 summary(af)
 
 
-# To make the major allele frequencies numerical and not factors...
+# To make the major and minor allele frequencies numerical and not factors...
 
 # So, first:
-af$<-as.character(af$V1)
-af$V1<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V1, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V1, perl=T) ) 
+af$V10<-as.character(af$V10)
+af$V10<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V10, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V10, perl=T) ) 
 
-af$V6<-as.character(af$V6)
-af$V6<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V6, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V6, perl=T) ) 
+af$V11<-as.character(af$V11)
+af$V11<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V11, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V11, perl=T) ) 
 
-af$V2<-as.character(af$V2)
-af$V2<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V2, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V2, perl=T) ) 
+af$V12<-as.character(af$V12)
+af$V12<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V12, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V12, perl=T) ) 
 
-af$V3<-as.character(af$V3)
-af$V3<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V3, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V3, perl=T) ) 
-
-af$V4<-as.character(af$V4)
-af$V4<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V4, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V4, perl=T) ) 
-
-af$V5<-as.character(af$V5)
-af$V5<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V5, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V5, perl=T) ) 
+af$V13<-as.character(af$V13)
+af$V13<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V13, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V13, perl=T) ) 
 
 summary(af)
 
 # To put headers on the columns....
 
-af$"Farm_2:Pre-Tx"<-af$V1
-af$"Farm_2:Post-IVM"<-af$V2
+af$"UGA:MajorAF"<-af$V10
+af$"ISE:MajorAF"<-af$V11
 
-af$"Farm_3:Pre-IVM:Rep_A"<-af$V3
-af$"Farm_3:Pre-IVM:Rep_B"<-af$V4
+af$"UGA:MinorAF"<-af$V12
+af$"ISE:MinorAF"<-af$V13
 
-af$"Farm_3:Post-IVM:Rep_A"<-af$V5
-af$"Farm_3:Post-IVM:Rep_B"<-af$V6
+write.table(af,"biallelic_AF_freq.txt",quote = FALSE,row.names = FALSE,sep = "\t")
 
-af_b<-af
-af<-af_b[7:12]
+awk '{print $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9 "\t" $14 "\t" $15 "\t" $16 "\t" $17}' biallelic_AF_freq.txt > B_biallelic_AF_freq.txt
 
