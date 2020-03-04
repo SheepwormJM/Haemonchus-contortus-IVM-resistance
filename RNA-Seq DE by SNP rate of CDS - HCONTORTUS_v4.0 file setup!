@@ -352,3 +352,73 @@ write.table(af,"biallelic_AF_freq.txt",quote = FALSE,row.names = FALSE,sep = "\t
 
 awk '{print $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9 "\t" $14 "\t" $15 "\t" $16 "\t" $17}' biallelic_AF_freq.txt > B_biallelic_AF_freq.txt
 
+# Note - the major allele for each pop is the most freq allele NOT the reference allele. To make it easier (possible) to evaluate
+# will change to separate files and re-run.
+
+awk '{print $1 "\t" $2 "\t" $3 "\t" $4}' CDS_XQTL_PARENTS.noindels.mpileup.sync > UGA_CDS_XQTL_PARENTS.noindels.mpileup.sync
+awk '{print $1 "\t" $2 "\t" $3 "\t" $5}' CDS_XQTL_PARENTS.noindels.mpileup.sync > ISE_CDS_XQTL_PARENTS.noindels.mpileup.sync
+
+perl /export/home/jmi45g/popoolation2_1201/snp-frequency-diff.pl \
+--input UGA_CDS_XQTL_PARENTS.noindels.mpileup.sync \
+--output-prefix UGA_CDS_XQTL_PARENTS. \
+--min-count 2 \
+--min-coverage 10 \
+--max-coverage 2%
+
+perl /export/home/jmi45g/popoolation2_1201/snp-frequency-diff.pl \
+--input ISE_CDS_XQTL_PARENTS.noindels.mpileup.sync \
+--output-prefix ISE_CDS_XQTL_PARENTS. \
+--min-count 2 \
+--min-coverage 10 \
+--max-coverage 2%
+
+# To get biallelic sites only: 
+
+awk '$4 == 2' UGA_CDS_XQTL_PARENTS._rc > biallelic_UGA_CDS_XQTL_PARENTS._rc
+awk '$4 == 2' ISE_CDS_XQTL_PARENTS._rc > biallelic_ISE_CDS_XQTL_PARENTS._rc
+
+# Then in R v 
+
+af<-read.table("biallelic_UGA_CDS_XQTL_PARENTS._rc", header=F, sep="\t", na.strings="")
+summary(af)
+
+
+# To make the major and minor allele frequencies numerical and not factors...
+
+# So, first:
+af$V10<-as.character(af$V10)
+af$V10<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V10, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V10, perl=T) ) 
+
+af$V11<-as.character(af$V11)
+af$V11<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V11, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V11, perl=T) ) 
+
+summary(af)
+
+# To put headers on the columns....
+
+af$"UGA:MajorAF"<-af$V10
+af$"UGA:MinorAF"<-af$V11
+
+write.table(af,"UGA_biallelic_AF_freq.txt",quote = FALSE,row.names = FALSE,sep = "\t")
+
+af<-read.table("biallelic_ISE_CDS_XQTL_PARENTS._rc", header=F, sep="\t", na.strings="")
+summary(af)
+
+
+# To make the major and minor allele frequencies numerical and not factors...
+
+# So, first:
+af$V10<-as.character(af$V10)
+af$V10<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V10, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V10, perl=T) ) 
+
+af$V11<-as.character(af$V11)
+af$V11<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V11, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V11, perl=T) ) 
+
+summary(af)
+af$"ISE:MajorAF"<-af$V10
+af$"ISE:MinorAF"<-af$V11
+
+write.table(af,"ISE_biallelic_AF_freq.txt",quote = FALSE,row.names = FALSE,sep = "\t")
+
+
+
