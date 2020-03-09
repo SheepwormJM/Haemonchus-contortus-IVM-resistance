@@ -465,3 +465,94 @@ mv B_all_0.4_UGA_AF.bed all_0.4_UGA_AF.bed
 # To intersect these two files. 
 
 bedtools intersect -a all_0.4_UGA_AF.bed -b gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.bed -wa -wb -f 2E-9 > CDS_all_0.4_UGA_AF.bed
+
+# Great. So to now try to count the number of SNPs per gene.... 
+
+awk -F "\t" '{a[$17] += $5; ++c[$17]} END{for (i in a) print i, a[i], c[i]}' CDS_all_0.4_UGA_AF.bed > SNP_NUMBER_CDS_all_0.4_UGA_AF
+
+# Perfect. (the first col = gene name, the next = sum of the SNP count col..... ie. as biallelic this is double the actual number of SNPs, and the third col is the number of SNPs. 
+
+# To make into a better file: 
+
+awk '{print $1 "\t" $3}' SNP_NUMBER_CDS_all_0.4_UGA_AF > SNP_COUNT_CDS_all_0.4_UGA_AF
+
+# To combine the CDS length and the SNP count files:
+#Using script from Dr Thomas Otto... 
+
+./list.join2List.nonUnique.pl SNP_COUNT_CDS_all_0.4_UGA_AF SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3 > UGA_SNP_CDS_0.4
+
+#Note ID that have a gene with the ID= etc still present!
+# How many?? 
+
+find . -name "SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3" | xargs grep -E 'ID' > ID_name
+
+#Only one: 
+#HCON_0005265
+
+#How many occurences of this? 
+
+find . -name "SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3" | xargs grep -E 'HCON_0005265' > ID_name
+
+#ID=cds:HCON_0005265;Parent=transcript:HCON_0005265 1096 11
+#HCON_00052650.1 879 9
+
+# Only one! The other has a longer gene name. So... is this just a strange anomaly in gene naming? 
+# To count as a separate gene.
+
+sed 's/ID=cds:HCON_0005265;Parent=transcript:HCON_0005265/HCON_0005265/g' SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3 > B_SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3 
+
+find . -name "B_SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3" | xargs grep -E 'HCON_0005265' > ID_name
+
+# Perfect!
+# HCON_0005265 1096 11
+# HCON_00052650.1 879 9
+
+find . -name "SNP_COUNT_CDS_all_0.4_UGA_AF" | xargs grep -E 'HCON_0005265' > ID_name
+
+# It has the same issue: 
+# ID=cds:HCON_0005265;Parent=transcript:HCON_0005265      30
+# HCON_00052650.1 1
+
+sed 's/ID=cds:HCON_0005265;Parent=transcript:HCON_0005265/HCON_0005265/g' SNP_COUNT_CDS_all_0.4_UGA_AF > B_SNP_COUNT_CDS_all_0.4_UGA_AF
+
+# Re-named the files without the B! 
+
+# Note, the REF file is delimited by white space. Need it to be tab delimited.... 
+
+awk -v OFS='\t' '{ $1=$1; print }' Sorted.SUM.CDS.REF > Sorted.SUM.CDS.REF_Tab
+
+~to16r/Bin/list.join2List.pl Sorted.SUM.CDS.REF_Tab Sorted_SNP_COUNT_CDS_all_0.4_UGA_AF > UGA_SNP_CDS_0.4
+
+#### YAYA!!!!! 
+
+########################
+-bash-3.2$ more UGA_SNP_CDS_0.4
+HCON_00000010   580     5       HCON_00000010   3
+HCON_00000020   485     4       NA      NA
+HCON_00000030   2299    20      HCON_00000030   1
+HCON_00000040   2345    1       HCON_00000040   1
+HCON_00000050   2345    1       NA      NA
+HCON_00000060   730     5       HCON_00000060   1
+HCON_00000070   2193    15      HCON_00000070   1
+HCON_00000080   704     1       NA      NA
+HCON_00000090   443     1       NA      NA
+HCON_00000100   326     1       NA      NA
+HCON_00000110   256     2       NA      NA
+HCON_00000120   452     1       HCON_00000120   1
+HCON_00000130   2927    1       HCON_00000130   1
+HCON_00000140   1692    6       HCON_00000140   4
+HCON_00000150   293     1       HCON_00000150   5
+HCON_00000160   370     2       HCON_00000160   7
+HCON_00000170   2032    2       HCON_00000170   13
+##########################
+
+# So... to calculate the SNP RATE per CDS (SNP count/TOTAL sites)
+# Col 1 = Gene name
+# Col 2 = Sum of sites
+# Col 3 = Sum of exons
+# Col 4 = Gene name
+# Col 5 = Sum of SNPs
+
+Therefore:
+
+awk '{print $1 "\t" $ 2 "\t" $3 "\t" $5 "\t" ($5/$2)}' UGA_SNP_CDS_0.4 > SNP_RATE_UGA_SNP_CDS_0.4
