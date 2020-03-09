@@ -421,4 +421,47 @@ af$"ISE:MinorAF"<-af$V11
 write.table(af,"ISE_biallelic_AF_freq.txt",quote = FALSE,row.names = FALSE,sep = "\t")
 
 
+## To reduce the file size remove the unwanted columns!
 
+awk '{print $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9 "\t" $12 "\t" $13}' UGA_biallelic_AF_freq.txt > B_UGA_biallelic_AF_freq.txt
+
+
+## So, have it such that have pop changes, with the major allele the same as the reference allele and rc|pop changes with the minor allele the same as the reference allele.
+## So, to select just hte rc|pop and then to take those with the major allele > 0.4. 
+
+find . -name "B_UGA_biallelic_AF_freq.txt" | xargs grep -E 'rc' > ALT_RC_UGA_biallelic_AF_freq.txt
+
+awk '$10 >0.4' ALT_RC_UGA_biallelic_AF_freq.txt > 0.4_ALT_RC_UGA_biallelic_AF_freq.txt
+
+## Then to get when the minor allele is >0.4. 
+
+find . -name "B_UGA_biallelic_AF_freq.txt" | xargs grep -v 'rc' > SAME_RA_UGA_biallelic_AF_freq.txt
+
+awk '$11 >0.4' SAME_RA_UGA_biallelic_AF_freq.txt > 0.4_SAME_RA_UGA_biallelic_AF_freq.txt
+
+# Great, so now have, for UGA, all the sites with a SNP allele different to the reference sequence with an allele frequency of >0.4.
+
+cat 0.4_SAME_RA_UGA_biallelic_AF_freq.txt 0.4_ALT_RC_UGA_biallelic_AF_freq.txt > all_0.4_UGA_AF
+
+# Looks good - has the rc below the pop
+
+-bash-3.2$ wc -l *UGA*
+   229796 0.4_ALT_RC_UGA_biallelic_AF_freq.txt
+    89851 0.4_SAME_RA_UGA_biallelic_AF_freq.txt
+   319647 all_0.4_UGA_AF
+
+# Need to make the file into a bed file to merge with the genes file. 
+
+awk '{print $1 "\t" ($2-1) "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9 "\t" $10 "\t" $11}' all_0.4_UGA_AF > all_0.4_UGA_AF.bed
+
+# Great - remember that the SNP is the THIRD column of the file!!! 
+
+# To remove the header line....
+
+find . -name "all_0.4_UGA_AF.bed" | xargs grep -v 'V' > B_all_0.4_UGA_AF.bed
+mv B_all_0.4_UGA_AF.bed all_0.4_UGA_AF.bed
+
+# Ok, so now have a file with all the SNPs of UGA cf the reference, with AF >0.4 and a file with all the CDS of all the genes. 
+# To intersect these two files. 
+
+bedtools intersect -a all_0.4_UGA_AF.bed -b gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.bed -wa -wb -f 2E-9 > CDS_all_0.4_UGA_AF.bed
