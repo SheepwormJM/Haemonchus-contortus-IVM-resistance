@@ -636,74 +636,34 @@ awk -F "\t" '{a[$17] += $5; ++c[$17]} END{for (i in a) print i, a[i], c[i]}' CDS
 
 awk '{print $1 "\t" $3}' SNP_NUMBER_CDS_all_0.4_ISE_AF > SNP_COUNT_CDS_all_0.4_ISE_AF
 
-# To combine the CDS length and the SNP count files:
-#Using script from Dr Thomas Otto... 
-
-./list.join2List.nonUnique.pl SNP_COUNT_CDS_all_0.4_ISE_AF SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3 > ISE_SNP_CDS_0.4
-
-#Note ID that have a gene with the ID= etc still present!
-# How many?? 
-
-find . -name "SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3" | xargs grep -E 'ID' > ID_name
-
-#Only one: 
-#HCON_0005265
-
-#How many occurences of this? 
-
-find . -name "SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3" | xargs grep -E 'HCON_0005265' > ID_name
-
-#ID=cds:HCON_0005265;Parent=transcript:HCON_0005265 1096 11
-#HCON_00052650.1 879 9
-
-# Only one! The other has a longer gene name. So... is this just a strange anomaly in gene naming? 
-# To count as a separate gene.
-
-sed 's/ID=cds:HCON_0005265;Parent=transcript:HCON_0005265/HCON_0005265/g' SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3 > B_SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3 
-
-find . -name "B_SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3" | xargs grep -E 'HCON_0005265' > ID_name
-
-# Perfect!
-# HCON_0005265 1096 11
-# HCON_00052650.1 879 9
-
-find . -name "SNP_COUNT_CDS_all_0.4_UGA_AF" | xargs grep -E 'HCON_0005265' > ID_name
+find . -name "SNP_COUNT_CDS_all_0.4_ISE_AF" | xargs grep -E 'HCON_0005265' > ID_name
 
 # It has the same issue: 
 # ID=cds:HCON_0005265;Parent=transcript:HCON_0005265      30
 # HCON_00052650.1 1
 
-sed 's/ID=cds:HCON_0005265;Parent=transcript:HCON_0005265/HCON_0005265/g' SNP_COUNT_CDS_all_0.4_UGA_AF > B_SNP_COUNT_CDS_all_0.4_UGA_AF
+sed 's/ID=cds:HCON_0005265;Parent=transcript:HCON_0005265/HCON_0005265/g' SNP_COUNT_CDS_all_0.4_ISE_AF > B_SNP_COUNT_CDS_all_0.4_ISE_AF
 
 # Re-named the files without the B! 
 
-# Note, the REF file is delimited by white space. Need it to be tab delimited.... 
+sort $1 SNP_COUNT_CDS_all_0.4_ISE_AF > Sorted_SNP_COUNT_CDS_all_0.4_ISE_AF
 
-awk -v OFS='\t' '{ $1=$1; print }' Sorted.SUM.CDS.REF > Sorted.SUM.CDS.REF_Tab
-
-~to16r/Bin/list.join2List.pl Sorted.SUM.CDS.REF_Tab Sorted_SNP_COUNT_CDS_all_0.4_UGA_AF > UGA_SNP_CDS_0.4
+~to16r/Bin/list.join2List.pl Sorted.SUM.CDS.REF_Tab Sorted_SNP_COUNT_CDS_all_0.4_ISE_AF > ISE_SNP_CDS_0.4
 
 #### YAYA!!!!! 
 
 ########################
--bash-3.2$ more UGA_SNP_CDS_0.4
-HCON_00000010   580     5       HCON_00000010   3
+-bash-3.2$ head ISE_SNP_CDS_0.4
+HCON_00000010   580     5       HCON_00000010   1
 HCON_00000020   485     4       NA      NA
-HCON_00000030   2299    20      HCON_00000030   1
-HCON_00000040   2345    1       HCON_00000040   1
-HCON_00000050   2345    1       NA      NA
+HCON_00000030   2299    20      NA      NA
+HCON_00000040   2345    1       HCON_00000040   4
+HCON_00000050   2345    1       HCON_00000050   3
 HCON_00000060   730     5       HCON_00000060   1
 HCON_00000070   2193    15      HCON_00000070   1
 HCON_00000080   704     1       NA      NA
 HCON_00000090   443     1       NA      NA
 HCON_00000100   326     1       NA      NA
-HCON_00000110   256     2       NA      NA
-HCON_00000120   452     1       HCON_00000120   1
-HCON_00000130   2927    1       HCON_00000130   1
-HCON_00000140   1692    6       HCON_00000140   4
-HCON_00000150   293     1       HCON_00000150   5
-HCON_00000160   370     2       HCON_00000160   7
-HCON_00000170   2032    2       HCON_00000170   13
 ##########################
 
 # So... to calculate the SNP RATE per CDS (SNP count/TOTAL sites)
@@ -715,5 +675,58 @@ HCON_00000170   2032    2       HCON_00000170   13
 
 Therefore:
 
-awk '{print $1 "\t" $ 2 "\t" $3 "\t" $5 "\t" ($5/$2)}' UGA_SNP_CDS_0.4 > SNP_RATE_UGA_SNP_CDS_0.4
+awk '{print $1 "\t" $ 2 "\t" $3 "\t" $5 "\t" ($5/$2)}' ISE_SNP_CDS_0.4 > SNP_RATE_ISE_SNP_CDS_0.4
+
+
+###### PERFECT!! ######
+
+##### To merge the UGA and ISE SNP_RATE files ######
+
+~to16r/Bin/list.join2List.pl SNP_RATE_ISE_SNP_CDS_0.4 SNP_RATE_UGA_SNP_CDS_0.4 > SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4
+
+# Worked fine:
+
+==> SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4 <==
+HCON_00000010   580     5       1       0.00172414      HCON_00000010   580     5       3       0.00517241
+HCON_00000020   485     4       NA      0       HCON_00000020   485     4       NA      0
+HCON_00000030   2299    20      NA      0       HCON_00000030   2299    20      1       0.000434972
+HCON_00000040   2345    1       4       0.00170576      HCON_00000040   2345    1       1       0.000426439
+HCON_00000050   2345    1       3       0.00127932      HCON_00000050   2345    1       NA      0
+HCON_00000060   730     5       1       0.00136986      HCON_00000060   730     5       1       0.00136986
+HCON_00000070   2193    15      1       0.000455996     HCON_00000070   2193    15      1       0.000455996
+HCON_00000080   704     1       NA      0       HCON_00000080   704     1       NA      0
+HCON_00000090   443     1       NA      0       HCON_00000090   443     1       NA      0
+HCON_00000100   326     1       NA      0       HCON_00000100   326     1       NA      0
+
+awk '{print $1 "\t" $ 2 "\t" $3 "\t" $4 "\t" $5 "\t" "\t" $9 "\t" $10}' SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4 > B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4
+mv B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4 SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4
+
+# Col 1 = Gene name
+# Col 2 = Sum of sites
+# Col 3 = Sum of exons
+# Col 4 = ISE SNP count
+# Col 5 = ISE CDS SNP rate (SNP count/Sum of sites)
+# Col 6 = UGA SNP count
+# Col 7 = UGA CDS SNP rate (SNP count/Sum of sites)
+
+# Note, to combine with Roz's DESEQ data need to remove the .1 from gene names!! 
+
+# To remove the .1 need to specify that . is a CHARACTER!!! Otherwise will change lots of things with 1 following them!
+# To do this do \.
+# Checked that it only collected the HCON_etc.1 and not other columns of figures. Also checked that there were no numbers with 0.1
+
+
+find . -name "SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4" | xargs grep -E 'HCON_........\.1' > ID_name
+
+sed 's/\.1//g' SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4 > B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4
+
+# All good. Will re-name the file: 
+mv B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4 SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4
+ 
+# Then to merge with Roz DESEQ data:
+
+# First have to remove the header line, also removed the end line (in excel - had an incomplete line of totals):
+
+~to16r/Bin/list.join2List.pl SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4 JAN2020_allmaleanalysis_summary.txt > BETA_JAN2020_allmaleanalysis_summary_tabular_CDS_SNP_RATE.txt
+
 
