@@ -618,28 +618,28 @@ awk '{print $1 "\t" ($2-1) "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" 
 
 # To remove the header line....
 
-find . -name "all_0.4_UGA_AF.bed" | xargs grep -v 'V' > B_all_0.4_UGA_AF.bed
-mv B_all_0.4_UGA_AF.bed all_0.4_UGA_AF.bed
+find . -name "all_0.4_ISE_AF.bed" | xargs grep -v 'V' > B_all_0.4_ISE_AF.bed
+mv B_all_0.4_ISE_AF.bed all_0.4_ISE_AF.bed
 
 # Ok, so now have a file with all the SNPs of UGA cf the reference, with AF >0.4 and a file with all the CDS of all the genes. 
 # To intersect these two files. 
 
-bedtools intersect -a all_0.4_UGA_AF.bed -b gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.bed -wa -wb -f 2E-9 > CDS_all_0.4_UGA_AF.bed
+bedtools intersect -a all_0.4_ISE_AF.bed -b gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.bed -wa -wb -f 2E-9 > CDS_all_0.4_ISE_AF.bed
 
 # Great. So to now try to count the number of SNPs per gene.... 
 
-awk -F "\t" '{a[$17] += $5; ++c[$17]} END{for (i in a) print i, a[i], c[i]}' CDS_all_0.4_UGA_AF.bed > SNP_NUMBER_CDS_all_0.4_UGA_AF
+awk -F "\t" '{a[$17] += $5; ++c[$17]} END{for (i in a) print i, a[i], c[i]}' CDS_all_0.4_ISE_AF.bed > SNP_NUMBER_CDS_all_0.4_ISE_AF
 
 # Perfect. (the first col = gene name, the next = sum of the SNP count col..... ie. as biallelic this is double the actual number of SNPs, and the third col is the number of SNPs. 
 
 # To make into a better file: 
 
-awk '{print $1 "\t" $3}' SNP_NUMBER_CDS_all_0.4_UGA_AF > SNP_COUNT_CDS_all_0.4_UGA_AF
+awk '{print $1 "\t" $3}' SNP_NUMBER_CDS_all_0.4_ISE_AF > SNP_COUNT_CDS_all_0.4_ISE_AF
 
 # To combine the CDS length and the SNP count files:
 #Using script from Dr Thomas Otto... 
 
-./list.join2List.nonUnique.pl SNP_COUNT_CDS_all_0.4_UGA_AF SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3 > UGA_SNP_CDS_0.4
+./list.join2List.nonUnique.pl SNP_COUNT_CDS_all_0.4_ISE_AF SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.gff3 > ISE_SNP_CDS_0.4
 
 #Note ID that have a gene with the ID= etc still present!
 # How many?? 
