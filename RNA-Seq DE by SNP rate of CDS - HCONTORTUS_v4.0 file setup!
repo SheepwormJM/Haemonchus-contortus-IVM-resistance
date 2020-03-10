@@ -156,6 +156,7 @@ awk '{print $1 "\t" $3 "\t" $4 "\t" $2 "\t" $5 "\t" $6}' Hcon_chr_2  > gene.leng
 
 
 # Got sent an mpileup file of the XQTL parents from Dr. S. Doyle (WSI). Note that UGA is first, ISE is second. Note that are sequenced from pools of 200 L3. 
+# Note, this has not been filtered for MAPQ. 
 
 # Format: Chr, bp, ref nuc, #reads covering site, Read base relative to reference, Read base quality. 
 
