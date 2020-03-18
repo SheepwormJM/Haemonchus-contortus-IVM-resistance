@@ -749,12 +749,13 @@ wget <file_link>
 find "$PWD" -name \*merged.sorted.marked.realigned.bam > bam.list
 
 # To index the reference genome:
-samtools-1.3 faidx <genome_file_name>.fa
-samtools-1.3 dict <genome_file_name>.fa > <genome_file_name>.dict
+# Installed samtools-1.9 to HPCC
+samtools faidx haemonchus_contortus.PRJEB506.WBPS14.genomic.fa
+samtools dict haemonchus_contortus.PRJEB506.WBPS14.genomic.fa > haemonchus_contortus.PRJEB506.WBPS14.genomic.dict
 
 # To create an mpileup file:
 samtools mpileup -B -q 20 -Q 30 --ff DUP \
--f <genome_file_name>.fa \
+-f haemonchus_contortus.PRJEB506.WBPS14.genomic.fa \
 -b bam.list > \
 MAPQ20.UGA_ISE.mpileup
 
