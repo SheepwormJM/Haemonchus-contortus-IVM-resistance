@@ -863,12 +863,42 @@ bedtools multicov -q 20 -bams \
 # Opened R studio
 # Loaded file, and created new column 'mid' which was the mid point of each 10kb window. 
 
+all<-read.table("")
+all$mid<-(all$V2+5000)
+
 chr1<-subset(all, all$V1=="hcontortus_chr1_Celeg_TT_arrow_pilon")
-x<-ggplot()+
-geom_point(x=chr1$mid, y=chr1$V4)+
-facet_wrap(all$V1)
+
+x<-ggplot(all)+
+geom_point(aes(x=all$mid, y=all$V4))+
+facet_grid(rows=vars(V1))
 x
 
+# For the MAPQ20 filtered data:
 
+mapq20<-read.table("bedtools_read_count_10kb_MAPQ20.bed")
+mapq20$mid<-(mapq20$V2+5000)
+
+x<-ggplot(mapq20)+
+geom_point(aes(x=mapq20$mid, y=mapq20$V4))+
+facet_grid(rows=vars(V1))
+x
+
+# Well, definitely have fewer reads aligning over the genome in certain areas, which brings the total y-axis scale down. 
+
+# Will try a zoomed in scale to try to compare region better. 
+
+# Most are less than 10k
+
+x<-ggplot(all)+
+geom_point(aes(x=all$mid, y=all$V4))+
+coord_cartesian(ylim=c(0,15000))+
+facet_grid(rows=vars(V1))
+x
+
+x<-ggplot(mapq20)+
+geom_point(aes(x=mapq20$mid, y=mapq20$V4))+
+coord_cartesian(ylim=c(0,15000))+
+facet_grid(rows=vars(V1))
+x
 
 
