@@ -754,10 +754,18 @@ samtools faidx haemonchus_contortus.PRJEB506.WBPS14.genomic.fa
 samtools dict haemonchus_contortus.PRJEB506.WBPS14.genomic.fa > haemonchus_contortus.PRJEB506.WBPS14.genomic.dict
 
 # To create an mpileup file:
+#!/bin/sh
+#PBS -l walltime=50:00:00
+#PBS -l cput=50:00:00
+#PBS -l nodes=1:centos6
+
+
 samtools mpileup -B -q 20 -Q 30 --ff DUP \
--f haemonchus_contortus.PRJEB506.WBPS14.genomic.fa \
--b bam.list > \
-MAPQ20.UGA_ISE.mpileup
+-f /export/home/jmi45g/Hcont_Snp_diversity/haemonchus_contortus.PRJEB506.WBPS14.genomic.fa \
+-b /export/home/jmi45g/Hcont_Snp_diversity/bam.list > \
+/export/home/jmi45g/Hcont_Snp_diversity/MAPQ20.UGA_ISE.mpileup
+
+#Saved as a run script, chmod +x,  and did qsub ./run_script.... 
 
 # Explanation of optional requests:
 # -B 'Disable probabilistic realignment for the computation of base alignment 
@@ -780,3 +788,71 @@ MAPQ20.UGA_ISE.mpileup
 # Note, I then needed to correct the mpileup file for the next step:
 
 sed 's/\t\t/\t!\t!/g' <file_name>.mpileup > <file_name>.mpileup2
+
+
+#############################################################
+# 3. To calculate the coverage by read count within given window sizes to assess how MAPQ changes over the genome
+# using bedtools suite (Quinlan, 2014; Quinlan and Hall, 2010)
+
+# Firstly, need to make windows using the genome. 
+# For this example, the window size is related to the mean gene length.
+
+# To use as input the indexed fasta file, which has the chr/end basepair.
+# Need to first make this into a bed file 
+
+awk '{print $1 "\t" 1 "\t" $2}' haemonchus_contortus.PRJEB506.WBPS14.genomic.fa.fai \
+> \
+haemonchus_contortus.PRJEB506.WBPS14.genomic.bed
+
+# Note - it still has the mitochondrial genome!
+
+hcontortus_chr4_Celeg_TT_arrow_pilon    1       51826579
+hcontortus_chr5_Celeg_TT_arrow_pilon    1       48868368
+hcontortus_chr2_Celeg_TT_arrow_pilon    1       47382676
+hcontortus_chrX_Celeg_TT_arrow_pilon    1       46012677
+hcontortus_chr1_Celeg_TT_arrow_pilon    1       45774638
+hcontortus_chr3_Celeg_TT_arrow_pilon    1       43560352
+hcontortus_chr_mtDNA_arrow_pilon        1       14018
+
+sed 's/hcontortus_//g' haemonchus_contortus.PRJEB506.WBPS14.genomic.bed > B_haemonchus_contortus.PRJEB506.WBPS14.genomic.bed
+sed 's/_Celeg_TT_arrow_pilon//g' B_haemonchus_contortus.PRJEB506.WBPS14.genomic.bed > haemonchus_contortus.PRJEB506.WBPS14.genomic.bed
+
+# In nano, removed the mtDNA and the chr.
+
+# Note, on the HPCC have bedtools v2.15.0
+# It wants something slightly different...
+# Chrom_name Lenght_of_chrm
+
+awk '{print $1 "\t" $3}' haemonchus_contortus.PRJEB506.WBPS14.genomic.bed > haemonchus_contortus.PRJEB506.WBPS14.genomic.chromosomes
+
+# Make the windows:
+bedtools makewindows -g haemonchus_contortus.PRJEB506.WBPS14.genomic.chromosomes \
+-w 10000 > \
+haemonchus_contortus.PRJEB506.WBPS14.genomic.gene_windows.bed
+
+# perfect
+
+# Next calculate the number of reads per window for each sample:
+# Supply all .bam files required
+# This example also filters the reads by MAPQ>=20 (-q)
+
+
+#!/bin/sh
+#PBS -l walltime=50:00:00
+#PBS -l cput=50:00:00
+#PBS -l nodes=1:centos6
+
+bedtools multicov -q 20 -bams \
+/export/home/jmi45g/Hcont_Snp_diversity/MHCO18_P0_L3_n200_IVM_01_26582_8_2.merged.sorted.marked.realigned.bam \
+/export/home/jmi45g/Hcont_Snp_diversity/MHCO3_P0_L3_n200_01_26582_8_1.merged.sorted.marked.realigned.bam \
+-bed /export/home/jmi45g/Hcont_Snp_diversity/haemonchus_contortus.PRJEB506.WBPS14.genomic.gene_windows.bed \
+> \
+/export/home/jmi45g/Hcont_Snp_diversity/bedtools_read_count_10kb_MAPQ20.bed
+
+# This is not working. 
+# Firstly it could not access the bam files (possibly a different header error), however when put both on the same line it worked ok. 
+# Secondly it outputs a file with all read counts as 0. I'm not sure why it is doing this. 
+# I am using v2.15.0, will try installing the latest version. 
+
+
+
