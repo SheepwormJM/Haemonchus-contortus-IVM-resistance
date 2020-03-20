@@ -1245,3 +1245,147 @@ geom_point(aes(x=mapq20$mid, y=mapq20$V5))+
 coord_cartesian(ylim=c(0,15000))+
 facet_grid(rows=vars(V1))
 x
+
+
+### ChrII
+
+chr2<-subset(all, all$V1 == "hcontortus_chr2_Celeg_TT_arrow_pilon")
+summary(chr2)
+chr2mapq20<-subset(mapq20, mapq20$V1=="hcontortus_chr2_Celeg_TT_arrow_pilon")
+summary(chr2mapq20)
+
+  # For UGA:
+
+x<-ggplot(chr2)+
+geom_point(aes(x=chr2$mid, y=chr2$V4))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+x<-ggplot(chr2mapq20)+
+geom_point(aes(x=chr2mapq20$mid, y=chr2mapq20$V4))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+
+# For ISE:
+
+
+x<-ggplot(chr2)+
+geom_point(aes(x=chr2$mid, y=chr2$V5))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+x<-ggplot(chr2mapq20)+
+geom_point(aes(x=chr2mapq20$mid, y=chr2mapq20$V5))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+# For both:
+x<-ggplot(chr2)+
+geom_smooth(aes(x=chr2$mid, y=chr2$V4), colour="green")+
+geom_smooth(aes(x=chr2mapq20$mid, y=chr2mapq20$V4), colour="blue")+
+geom_smooth(aes(x=chr2$mid, y=chr2$V5), colour="pink")+
+geom_smooth(aes(x=chr2mapq20$mid, y=chr2mapq20$V5), colour="purple")+
+coord_cartesian(ylim=c(0,15000))
+x
+
+ 
+
+### ChrIII
+
+chr3<-subset(all, all$V1 == "hcontortus_chr3_Celeg_TT_arrow_pilon")
+summary(chr3)
+chr3mapq20<-subset(mapq20, mapq20$V1=="hcontortus_chr3_Celeg_TT_arrow_pilon")
+summary(chr3mapq20)
+
+  # For UGA:
+
+x<-ggplot(chr3)+
+geom_point(aes(x=chr3$mid, y=chr3$V4))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+x<-ggplot(chr3mapq20)+
+geom_point(aes(x=chr3mapq20$mid, y=chr3mapq20$V4))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+
+# For ISE:
+
+
+x<-ggplot(chr3)+
+geom_point(aes(x=chr3$mid, y=chr3$V5))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+x<-ggplot(chr3mapq20)+
+geom_point(aes(x=chr3mapq20$mid, y=chr3mapq20$V5))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+# For both:
+x<-ggplot(chr3)+
+geom_smooth(aes(x=chr3$mid, y=chr3$V4), colour="green")+
+geom_smooth(aes(x=chr3mapq20$mid, y=chr3mapq20$V4), colour="blue")+
+geom_smooth(aes(x=chr3$mid, y=chr3$V5), colour="pink")+
+geom_smooth(aes(x=chr3mapq20$mid, y=chr3mapq20$V5), colour="purple")+
+coord_cartesian(ylim=c(0,15000))
+x
+
+
+## Chr4
+chr4<-subset(all, all$V1 == "hcontortus_chr4_Celeg_TT_arrow_pilon")
+summary(chr4)
+chr4mapq20<-subset(mapq20, mapq20$V1=="hcontortus_chr4_Celeg_TT_arrow_pilon")
+summary(chr4mapq20)
+
+  # For UGA:
+
+x<-ggplot(chr4)+
+geom_point(aes(x=chr4$mid, y=chr4$V4))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+x<-ggplot(chr4mapq20)+
+geom_point(aes(x=chr4mapq20$mid, y=chr4mapq20$V4))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+
+# For ISE:
+
+
+x<-ggplot(chr4)+
+geom_point(aes(x=chr4$mid, y=chr4$V5))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+x<-ggplot(chr4mapq20)+
+geom_point(aes(x=chr4mapq20$mid, y=chr4mapq20$V5))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+# For both:
+x<-ggplot(chr4)+
+geom_smooth(aes(x=chr4$mid, y=chr4$V4), colour="green")+
+geom_smooth(aes(x=chr4mapq20$mid, y=chr4mapq20$V4), colour="blue")+
+geom_smooth(aes(x=chr4$mid, y=chr4$V5), colour="pink")+
+geom_smooth(aes(x=chr4mapq20$mid, y=chr4mapq20$V5), colour="purple")+
+coord_cartesian(ylim=c(0,15000))
+x
+
+boxplot(all$V4 ~ all$V1, data = all, ylim =c(0,15000))
+boxplot(V4 ~ V1, data = mapq20, ylim =c(0,15000))
+# Note are mtDNA, 1-5, X.
+
+boxplot(all$V5 ~ all$V1, data = all, ylim =c(0,15000))
+boxplot(V5 ~ V1, data = mapq20, ylim =c(0,15000))
+abline(h=5000, col="blue")
+abline(h=6000, col="blue")
+abline(h=7000, col="blue")
+abline(h=8000, col="blue")
+abline(h=9000, col="blue")
+
+
+
