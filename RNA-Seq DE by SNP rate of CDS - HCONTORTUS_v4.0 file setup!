@@ -787,7 +787,47 @@ samtools mpileup -B -q 20 -Q 30 --ff DUP \
 
 # Note, I then needed to correct the mpileup file for the next step:
 
-sed 's/\t\t/\t!\t!/g' <file_name>.mpileup > <file_name>.mpileup2
+sed 's/\t\t/\t!\t!/g' MAPQ20.UGA_ISE.mpileup > MAPQ20.UGA_ISE.mpileup2
+
+
+
+#!/bin/sh
+#PBS -l walltime=50:00:00
+#PBS -l cput=50:00:00
+#PBS -l nodes=1:centos6
+
+awk 'BEGIN{sum=0; counter=-1}{sum+=$4; counter+=1}END{print sum/counter}' /export/home/jmi45g/Hcont_Snp_diversity/MAPQ20.UGA_ISE.mpileup2 > /export/home/jmi45g/Hcont_Snp_diversity/mean.UGA.MAPQ20.UGA_ISE.mpileup2
+awk 'BEGIN{sum=0; counter=-1}{sum+=$7; counter+=1}END{print sum/counter}' /export/home/jmi45g/Hcont_Snp_diversity/MAPQ20.UGA_ISE.mpileup2 > /export/home/jmi45g/Hcont_Snp_diversity/mean.ISE.MAPQ20.UGA_ISE.mpileup2
+
+# UGA: 72.0517
+# ISE: 65.9491
+
+## ISE has reduced by more than UGA! 
+
+
+# To make into a .bed file to extract the CDS:
+
+
+#!/bin/sh
+#PBS -l walltime=50:00:00
+#PBS -l cput=50:00:00
+#PBS -l nodes=1:centos6
+awk '{print $1 "\t" $2 "\t" ($2+1) "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9}' /export/home/jmi45g/Hcont_Snp_diversity/MAPQ20.UGA_ISE.mpileup2 > /export/home/jmi45g/Hcont_Snp_diversity/bp2_MAPQ20.UGA_ISE.mpileup2
+
+# To make into a bed file:
+
+#!/bin/sh
+#PBS -l walltime=50:00:00
+#PBS -l cput=50:00:00
+#PBS -l nodes=1:centos6
+sed 's/hcontortus_chr//g' /export/home/jmi45g/Hcont_Snp_diversity/bp2_MAPQ20.UGA_ISE.mpileup2 > /export/home/jmi45g/Hcont_Snp_diversity/Hcon_chr_1 
+
+sed 's/_Celeg_TT_arrow_pilon//g' /export/home/jmi45g/Hcont_Snp_diversity/Hcon_chr_1 > /export/home/jmi45g/Hcont_Snp_diversity/bp2_MAPQ20.UGA_ISE.mpileup2.bed
+
+# To get only those sites that I am interested in: 
+
+bedtools intersect -a bp2_XQTL_PARENTS.bed -b gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.bed -wa -wb -f 2E-9 > CDS_bp2_XQTL_PARENTS.bed
+
 
 
 #############################################################
@@ -863,8 +903,41 @@ bedtools multicov -q 20 -bams \
 # Opened R studio
 # Loaded file, and created new column 'mid' which was the mid point of each 10kb window. 
 
-all<-read.table("")
+all<-read.table("bedtools_read_count_10kb_MAPQall.bed")
 all$mid<-(all$V2+5000)
+
+> summary(all)
+                                    V1      
+ hcontortus_chr_mtDNA_arrow_pilon    :   2  
+ hcontortus_chr1_Celeg_TT_arrow_pilon:4578  
+ hcontortus_chr2_Celeg_TT_arrow_pilon:4739  
+ hcontortus_chr3_Celeg_TT_arrow_pilon:4357  
+ hcontortus_chr4_Celeg_TT_arrow_pilon:5183  
+ hcontortus_chr5_Celeg_TT_arrow_pilon:4887  
+ hcontortus_chrX_Celeg_TT_arrow_pilon:4602  
+       V2                 V3          
+ Min.   :       0   Min.   :   10000  
+ 1st Qu.:11800000   1st Qu.:11810000  
+ Median :23615000   Median :23625000  
+ Mean   :23687028   Mean   :23697026  
+ 3rd Qu.:35430000   3rd Qu.:35440000  
+ Max.   :51820000   Max.   :51826579  
+                                      
+       V4               V5        
+ Min.   :     0   Min.   :     0  
+ 1st Qu.:  5926   1st Qu.:  6243  
+ Median :  6904   Median :  7253  
+ Mean   :  7711   Mean   :  7969  
+ 3rd Qu.:  7926   3rd Qu.:  8191  
+ Max.   :705518   Max.   :670923  
+                                  
+      mid          
+ Min.   :    5000  
+ 1st Qu.:11805000  
+ Median :23620000  
+ Mean   :23692028  
+ 3rd Qu.:35435000  
+ Max.   :51825000  
 
 chr1<-subset(all, all$V1=="hcontortus_chr1_Celeg_TT_arrow_pilon")
 
@@ -877,6 +950,40 @@ x
 
 mapq20<-read.table("bedtools_read_count_10kb_MAPQ20.bed")
 mapq20$mid<-(mapq20$V2+5000)
+> summary(mapq20)
+                                    V1      
+ hcontortus_chr_mtDNA_arrow_pilon    :   2  
+ hcontortus_chr1_Celeg_TT_arrow_pilon:4578  
+ hcontortus_chr2_Celeg_TT_arrow_pilon:4739  
+ hcontortus_chr3_Celeg_TT_arrow_pilon:4357  
+ hcontortus_chr4_Celeg_TT_arrow_pilon:5183  
+ hcontortus_chr5_Celeg_TT_arrow_pilon:4887  
+ hcontortus_chrX_Celeg_TT_arrow_pilon:4602  
+       V2                 V3          
+ Min.   :       0   Min.   :   10000  
+ 1st Qu.:11800000   1st Qu.:11810000  
+ Median :23615000   Median :23625000  
+ Mean   :23687028   Mean   :23697026  
+ 3rd Qu.:35430000   3rd Qu.:35440000  
+ Max.   :51820000   Max.   :51826579  
+                                      
+       V4               V5        
+ Min.   :     0   Min.   :     0  
+ 1st Qu.:  5266   1st Qu.:  5697  
+ Median :  6270   Median :  6671  
+ Mean   :  6330   Mean   :  6709  
+ 3rd Qu.:  7292   3rd Qu.:  7705  
+ Max.   :159877   Max.   :196406  
+                                  
+      mid          
+ Min.   :    5000  
+ 1st Qu.:11805000  
+ Median :23620000  
+ Mean   :23692028  
+ 3rd Qu.:35435000  
+ Max.   :51825000 
+ 
+ ## Note that, despite the lower awk mean for ISE, the mean read count is greater for ISE than for UGA. 
 
 x<-ggplot(mapq20)+
 geom_point(aes(x=mapq20$mid, y=mapq20$V4))+
@@ -888,6 +995,8 @@ x
 # Will try a zoomed in scale to try to compare region better. 
 
 # Most are less than 10k
+
+# For UGA:
 
 x<-ggplot(all)+
 geom_point(aes(x=all$mid, y=all$V4))+
@@ -902,3 +1011,237 @@ facet_grid(rows=vars(V1))
 x
 
 
+# For ISE:
+
+
+x<-ggplot(all)+
+geom_point(aes(x=all$mid, y=all$V5))+
+coord_cartesian(ylim=c(0,15000))+
+facet_grid(rows=vars(V1))
+x
+
+x<-ggplot(mapq20)+
+geom_point(aes(x=mapq20$mid, y=mapq20$V5))+
+coord_cartesian(ylim=c(0,15000))+
+facet_grid(rows=vars(V1))
+x
+
+chr5<-subset(all, all$V1 == "hcontortus_chr5_Celeg_TT_arrow_pilon")
+summary(chr5)
+                                    V1      
+ hcontortus_chr_mtDNA_arrow_pilon    :   0  
+ hcontortus_chr1_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr2_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr3_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr4_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr5_Celeg_TT_arrow_pilon:4887  
+ hcontortus_chrX_Celeg_TT_arrow_pilon:   0  
+       V2                 V3          
+ Min.   :       0   Min.   :   10000  
+ 1st Qu.:12215000   1st Qu.:12225000  
+ Median :24430000   Median :24440000  
+ Mean   :24430000   Mean   :24440000  
+ 3rd Qu.:36645000   3rd Qu.:36655000  
+ Max.   :48860000   Max.   :48868368  
+                                      
+       V4               V5        
+ Min.   :     0   Min.   :     0  
+ 1st Qu.:  5515   1st Qu.:  6001  
+ Median :  6860   Median :  7309  
+ Mean   :  7337   Mean   :  7661  
+ 3rd Qu.:  7917   3rd Qu.:  8266  
+ Max.   :328158   Max.   :330763  
+                                  
+      mid          
+ Min.   :    5000  
+ 1st Qu.:12220000  
+ Median :24435000  
+ Mean   :24435000  
+ 3rd Qu.:36650000  
+ Max.   :48865000  
+                   
+chr5mapq20<-subset(mapq20, mapq20$V1=="hcontortus_chr5_Celeg_TT_arrow_pilon")
+summary(chr5mapq20)
+                                    V1      
+ hcontortus_chr_mtDNA_arrow_pilon    :   0  
+ hcontortus_chr1_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr2_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr3_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr4_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr5_Celeg_TT_arrow_pilon:4887  
+ hcontortus_chrX_Celeg_TT_arrow_pilon:   0  
+       V2                 V3          
+ Min.   :       0   Min.   :   10000  
+ 1st Qu.:12215000   1st Qu.:12225000  
+ Median :24430000   Median :24440000  
+ Mean   :24430000   Mean   :24440000  
+ 3rd Qu.:36645000   3rd Qu.:36655000  
+ Max.   :48860000   Max.   :48868368  
+                                      
+       V4              V5             mid          
+ Min.   :    0   Min.   :    0   Min.   :    5000  
+ 1st Qu.: 4734   1st Qu.: 5306   1st Qu.:12220000  
+ Median : 6161   Median : 6698   Median :24435000  
+ Mean   : 5970   Mean   : 6450   Mean   :24435000  
+ 3rd Qu.: 7280   3rd Qu.: 7752   3rd Qu.:36650000  
+ Max.   :67188   Max.   :75389   Max.   :48865000 
+ 
+ ### To plot ChrV only
+ 
+ 
+ # For UGA:
+
+x<-ggplot(chr5)+
+geom_point(aes(x=chr5$mid, y=chr5$V4))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+x<-ggplot(chr5mapq20)+
+geom_point(aes(x=chr5mapq20$mid, y=chr5mapq20$V4))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+
+# For ISE:
+
+
+x<-ggplot(chr5)+
+geom_point(aes(x=chr5$mid, y=chr5$V5))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+x<-ggplot(chr5mapq20)+
+geom_point(aes(x=chr5mapq20$mid, y=chr5mapq20$V5))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+
+### ChrI
+
+chr1<-subset(all, all$V1 == "hcontortus_chr1_Celeg_TT_arrow_pilon")
+summary(chr1)
+
+                                    V1      
+ hcontortus_chr_mtDNA_arrow_pilon    :   0  
+ hcontortus_chr1_Celeg_TT_arrow_pilon:4578  
+ hcontortus_chr2_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr3_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr4_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr5_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chrX_Celeg_TT_arrow_pilon:   0  
+       V2                 V3          
+ Min.   :       0   Min.   :   10000  
+ 1st Qu.:11442500   1st Qu.:11452500  
+ Median :22885000   Median :22895000  
+ Mean   :22885000   Mean   :22894999  
+ 3rd Qu.:34327500   3rd Qu.:34337500  
+ Max.   :45770000   Max.   :45774638  
+                                      
+       V4               V5        
+ Min.   :     0   Min.   :     0  
+ 1st Qu.:  5866   1st Qu.:  6193  
+ Median :  6891   Median :  7275  
+ Mean   :  7353   Mean   :  7626  
+ 3rd Qu.:  7860   3rd Qu.:  8156  
+ Max.   :215190   Max.   :224981  
+                                  
+      mid          
+ Min.   :    5000  
+ 1st Qu.:11447500  
+ Median :22890000  
+ Mean   :22890000  
+ 3rd Qu.:34332500  
+ Max.   :45775000 
+chr1mapq20<-subset(mapq20, mapq20$V1=="hcontortus_chr1_Celeg_TT_arrow_pilon")
+summary(chr1mapq20)
+
+                                    V1      
+ hcontortus_chr_mtDNA_arrow_pilon    :   0  
+ hcontortus_chr1_Celeg_TT_arrow_pilon:4578  
+ hcontortus_chr2_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr3_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr4_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chr5_Celeg_TT_arrow_pilon:   0  
+ hcontortus_chrX_Celeg_TT_arrow_pilon:   0  
+       V2                 V3          
+ Min.   :       0   Min.   :   10000  
+ 1st Qu.:11442500   1st Qu.:11452500  
+ Median :22885000   Median :22895000  
+ Mean   :22885000   Mean   :22894999  
+ 3rd Qu.:34327500   3rd Qu.:34337500  
+ Max.   :45770000   Max.   :45774638  
+                                      
+       V4               V5        
+ Min.   :     0   Min.   :     0  
+ 1st Qu.:  5198   1st Qu.:  5588  
+ Median :  6296   Median :  6746  
+ Mean   :  6193   Mean   :  6585  
+ 3rd Qu.:  7288   3rd Qu.:  7703  
+ Max.   :102809   Max.   :126238  
+                                  
+      mid          
+ Min.   :    5000  
+ 1st Qu.:11447500  
+ Median :22890000  
+ Mean   :22890000  
+ 3rd Qu.:34332500  
+ Max.   :45775000 
+ 
+  # For UGA:
+
+x<-ggplot(chr1)+
+geom_point(aes(x=chr1$mid, y=chr1$V4))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+x<-ggplot(chr1mapq20)+
+geom_point(aes(x=chr1mapq20$mid, y=chr1mapq20$V4))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+
+# For ISE:
+
+
+x<-ggplot(chr1)+
+geom_point(aes(x=chr1$mid, y=chr1$V5))+
+coord_cartesian(ylim=c(0,15000))
+x
+
+x<-ggplot(chr1mapq20)+
+geom_point(aes(x=chr1mapq20$mid, y=chr1mapq20$V5))+
+coord_cartesian(ylim=c(0,15000))
+x
+ 
+ 
+ 
+ # For UGA:
+
+x<-ggplot(all)+
+geom_point(aes(x=all$mid, y=all$V4, col=all$V1))+
+coord_cartesian(ylim=c(0,15000))+
+facet_grid(rows=vars(V1))+
+theme(legend.position="bottom")
+x
+
+x<-ggplot(mapq20)+
+geom_point(aes(x=mapq20$mid, y=mapq20$V4))+
+coord_cartesian(ylim=c(0,15000))+
+facet_grid(rows=vars(V1))
+x
+
+
+# For ISE:
+
+
+x<-ggplot(all)+
+geom_point(aes(x=all$mid, y=all$V5))+
+coord_cartesian(ylim=c(0,15000))+
+facet_grid(rows=vars(V1))
+x
+
+x<-ggplot(mapq20)+
+geom_point(aes(x=mapq20$mid, y=mapq20$V5))+
+coord_cartesian(ylim=c(0,15000))+
+facet_grid(rows=vars(V1))
+x
