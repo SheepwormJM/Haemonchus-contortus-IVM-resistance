@@ -1213,9 +1213,9 @@ mv B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20 SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MA
  
 # Then to merge with Roz DESEQ data:
 
-# First have to remove the header line, also removed the end line (in excel - had an incomplete line of totals):
+# First have to remove the header line pf Roz's file, also removed the end line (in excel - had an incomplete line of totals - but didn't notice this time around! So didn't remove.???):
 
-~to16r/Bin/list.join2List.pl SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ2 JAN2020_allmaleanalysis_summary.txt > BETA_JAN2020_allmaleanalysis_summary_tabular_CDS_SNP_RATE_MAPQ20.txt
+~to16r/Bin/list.join2List.pl SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20 JAN2020_allmaleanalysis_summary_noheader.txt > BETA_JAN2020_allmaleanalysis_summary_tabular_CDS_SNP_RATE_MAPQ20.txt
 
 
 ############################################################################################################################################################################# BEDTOOLS MULTICOV   ###########################################################################
