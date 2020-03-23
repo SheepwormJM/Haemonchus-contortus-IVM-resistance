@@ -892,16 +892,24 @@ awk '{print $1 "\t" $2 "\t" $3 "\t" $4}' /export/home/jmi45g/Hcont_Snp_diversity
 #PBS -l nodes=1:centos6
 awk '{print $1 "\t" $2 "\t" $3 "\t" $5}' /export/home/jmi45g/Hcont_Snp_diversity/CDS_bp2_MAPQ20.UGA_ISE.noindels.java.sync > /export/home/jmi45g/Hcont_Snp_diversity/ISE_CDS_bp2_MAPQ20.UGA_ISE.noindels.java.sync
 
+#!/bin/sh
+#PBS -l walltime=30:00:00
+#PBS -l cput=50:00:00
+#PBS -l nodes=1:centos6
 perl /export/home/jmi45g/popoolation2_1201/snp-frequency-diff.pl \
---input UGA_CDS_XQTL_PARENTS.noindels.mpileup.sync \
---output-prefix UGA_CDS_XQTL_PARENTS. \
+--input /export/home/jmi45g/Hcont_Snp_diversity/UGA_CDS_bp2_MAPQ20.UGA_ISE.noindels.java.sync \
+--output-prefix /export/home/jmi45g/Hcont_Snp_diversity/UGA_CDS_MAPQ20. \
 --min-count 2 \
 --min-coverage 10 \
 --max-coverage 2%
 
+#!/bin/sh
+#PBS -l walltime=30:00:00
+#PBS -l cput=50:00:00
+#PBS -l nodes=1:centos6
 perl /export/home/jmi45g/popoolation2_1201/snp-frequency-diff.pl \
---input ISE_CDS_XQTL_PARENTS.noindels.mpileup.sync \
---output-prefix ISE_CDS_XQTL_PARENTS. \
+--input /export/home/jmi45g/Hcont_Snp_diversity/ISE_CDS_bp2_MAPQ20.UGA_ISE.noindels.java.sync \
+--output-prefix /export/home/jmi45g/Hcont_Snp_diversity/ISE_CDS_MAPQ20. \
 --min-count 2 \
 --min-coverage 10 \
 --max-coverage 2%
