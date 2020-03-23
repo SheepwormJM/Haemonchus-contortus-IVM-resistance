@@ -1160,7 +1160,6 @@ mv B_SNP_COUNT_CDS_all_0.4_ISE_MAPQ20_AF SNP_COUNT_CDS_all_0.4_ISE_MAPQ20_AF
 
 sort $1 SNP_COUNT_CDS_all_0.4_ISE_MAPQ20_AF > Sorted_SNP_COUNT_CDS_all_0.4_ISE_MAPQ20_AF
 
-#### DONE TO HERE! 
 
 ~to16r/Bin/list.join2List.pl Sorted.SUM.CDS.REF_Tab Sorted_SNP_COUNT_CDS_all_0.4_ISE_MAPQ20_AF > ISE_MAPQ20_SNP_CDS_0.4
 
@@ -1174,15 +1173,6 @@ sort $1 SNP_COUNT_CDS_all_0.4_ISE_MAPQ20_AF > Sorted_SNP_COUNT_CDS_all_0.4_ISE_M
 Therefore:
 
 awk '{print $1 "\t" $ 2 "\t" $3 "\t" $5 "\t" ($5/$2)}' ISE_MAPQ20_SNP_CDS_0.4 > SNP_RATE_ISE_MAPQ20_SNP_CDS_0.4
-
-
-
-
-
-
-
-
-
 
 
 ###### PERFECT!! ######
@@ -1217,11 +1207,7 @@ sed 's/\.1//g' SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20 > B_SNP_RATE_ISE_AND_UGA_
 
 # All good. Will re-name the file: 
 mv B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20 SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20
- 
- 
- 
- 
- 
+  
  
  
  
@@ -1229,7 +1215,7 @@ mv B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20 SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MA
 
 # First have to remove the header line, also removed the end line (in excel - had an incomplete line of totals):
 
-~to16r/Bin/list.join2List.pl SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4 JAN2020_allmaleanalysis_summary.txt > BETA_JAN2020_allmaleanalysis_summary_tabular_CDS_SNP_RATE.txt
+~to16r/Bin/list.join2List.pl SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ2 JAN2020_allmaleanalysis_summary.txt > BETA_JAN2020_allmaleanalysis_summary_tabular_CDS_SNP_RATE_MAPQ20.txt
 
 
 ############################################################################################################################################################################# BEDTOOLS MULTICOV   ###########################################################################
