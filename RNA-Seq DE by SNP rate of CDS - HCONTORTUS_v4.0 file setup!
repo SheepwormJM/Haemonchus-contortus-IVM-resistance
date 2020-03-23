@@ -1050,9 +1050,19 @@ sort $1 SNP_COUNT_CDS_all_0.4_UGA_MAPQ20_AF > Sorted_SNP_COUNT_CDS_all_0.4_UGA_M
 
 #### DONE TO HERE! 
 
-~to16r/Bin/list.join2List.pl Sorted.SUM.CDS.REF_Tab Sorted_SNP_COUNT_CDS_all_0.4_ISE_AF > ISE_SNP_CDS_0.4
+~to16r/Bin/list.join2List.pl Sorted.SUM.CDS.REF_Tab Sorted_SNP_COUNT_CDS_all_0.4_UGA_MAPQ20_AF > UGA_MAPQ20_SNP_CDS_0.4
 
 
+# So... to calculate the SNP RATE per CDS (SNP count/TOTAL sites)
+# Col 1 = Gene name
+# Col 2 = Sum of sites
+# Col 3 = Sum of exons
+# Col 4 = Gene name
+# Col 5 = Sum of SNPs
+
+Therefore:
+
+awk '{print $1 "\t" $ 2 "\t" $3 "\t" $5 "\t" ($5/$2)}' UGA_MAPQ20_SNP_CDS_0.4 > SNP_RATE_UGA_MAPQ20_SNP_CDS_0.4
 
 
 
@@ -1152,7 +1162,74 @@ sort $1 SNP_COUNT_CDS_all_0.4_ISE_MAPQ20_AF > Sorted_SNP_COUNT_CDS_all_0.4_ISE_M
 
 #### DONE TO HERE! 
 
-~to16r/Bin/list.join2List.pl Sorted.SUM.CDS.REF_Tab Sorted_SNP_COUNT_CDS_all_0.4_ISE_AF > ISE_SNP_CDS_0.4
+~to16r/Bin/list.join2List.pl Sorted.SUM.CDS.REF_Tab Sorted_SNP_COUNT_CDS_all_0.4_ISE_MAPQ20_AF > ISE_MAPQ20_SNP_CDS_0.4
+
+# So... to calculate the SNP RATE per CDS (SNP count/TOTAL sites)
+# Col 1 = Gene name
+# Col 2 = Sum of sites
+# Col 3 = Sum of exons
+# Col 4 = Gene name
+# Col 5 = Sum of SNPs
+
+Therefore:
+
+awk '{print $1 "\t" $ 2 "\t" $3 "\t" $5 "\t" ($5/$2)}' ISE_MAPQ20_SNP_CDS_0.4 > SNP_RATE_ISE_MAPQ20_SNP_CDS_0.4
+
+
+
+
+
+
+
+
+
+
+
+###### PERFECT!! ######
+
+##### To merge the UGA and ISE SNP_RATE files ######
+
+~to16r/Bin/list.join2List.pl SNP_RATE_ISE_MAPQ20_SNP_CDS_0.4 SNP_RATE_UGA_MAPQ20_SNP_CDS_0.4 > SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20
+
+# Worked fine:
+
+awk '{print $1 "\t" $ 2 "\t" $3 "\t" $4 "\t" $5 "\t" "\t" $9 "\t" $10}' SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20 > B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20
+mv B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20 SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20
+
+# Col 1 = Gene name
+# Col 2 = Sum of sites
+# Col 3 = Sum of exons
+# Col 4 = ISE SNP count
+# Col 5 = ISE CDS SNP rate (SNP count/Sum of sites)
+# Col 6 = UGA SNP count
+# Col 7 = UGA CDS SNP rate (SNP count/Sum of sites)
+
+# Note, to combine with Roz's DESEQ data need to remove the .1 from gene names!! 
+
+# To remove the .1 need to specify that . is a CHARACTER!!! Otherwise will change lots of things with 1 following them!
+# To do this do \.
+# Checked that it only collected the HCON_etc.1 and not other columns of figures. Also checked that there were no numbers with 0.1
+
+
+find . -name "SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20" | xargs grep -E 'HCON_........\.1' > ID_name
+
+sed 's/\.1//g' SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20 > B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20
+
+# All good. Will re-name the file: 
+mv B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20 SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_MAPQ20
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+# Then to merge with Roz DESEQ data:
+
+# First have to remove the header line, also removed the end line (in excel - had an incomplete line of totals):
+
+~to16r/Bin/list.join2List.pl SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4 JAN2020_allmaleanalysis_summary.txt > BETA_JAN2020_allmaleanalysis_summary_tabular_CDS_SNP_RATE.txt
 
 
 ############################################################################################################################################################################# BEDTOOLS MULTICOV   ###########################################################################
