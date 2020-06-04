@@ -157,6 +157,34 @@ HCON_V4_curated_20200422_WBPS15.gff3
 
 
 
+###########################################################
+
+# 2. To obtain from the MAPQ20 mpileup file (created previously (see line 830 in ... ) only those variants within the coding sequence
+# The previous MAPQ20 mpileup file (.bed format) is called MAPQ20.UGA_ISE.mpileup2 
+
+# To get only those sites that I am interested in: 
+
+# Make a bed file of the mpileup file:
+
+# To make into a .bed file to extract the CDS:
+
+#!/bin/sh
+#PBS -l walltime=50:00:00
+#PBS -l cput=50:00:00
+#PBS -l nodes=1:centos6
+awk '{print $1 "\t" $2 "\t" ($2+1) "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9}' /export/home/jmi45g/Hcont_Snp_diversity/MAPQ20.UGA_ISE.mpileup2 > /export/home/jmi45g/Hcont_Snp_diversity/bp2_MAPQ20.UGA_ISE.mpileup2
+
+
+
+#!/bin/sh
+#PBS -l walltime=50:00:00
+#PBS -l cput=50:00:00
+#PBS -l nodes=1:centos6
+bedtools intersect -a /export/home/jmi45g/Hcont_Snp_diversity/bp2_MAPQ20.UGA_ISE.mpileup2.bed -b /export/home/jmi45g/Hcont_Snp_diversity/gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS14.annotations.bed -wa -wb -f 2E-9 > /export/home/jmi45g/Hcont_Snp_diversity/CDS_bp2_MAPQ20.UGA_ISE.mpileup2.bed
+
+
+
+
 
 
 
