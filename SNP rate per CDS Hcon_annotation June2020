@@ -187,6 +187,23 @@ qsub ./run_file_name
 # To monitor progress of a job:
 qstat
 
+# To make into a bed file:
+
+#!/bin/sh
+#PBS -l walltime=50:00:00
+#PBS -l cput=50:00:00
+#PBS -l nodes=1:centos6
+sed 's/hcontortus_chr//g' /export/home/jmi45g/Hcont_Snp_diversity/bp2_MAPQ20.UGA_ISE.mpileup2 > /export/home/jmi45g/Hcont_Snp_diversity/Hcon_chr_1 
+
+#!/bin/sh
+#PBS -l walltime=50:00:00
+#PBS -l cput=50:00:00
+#PBS -l nodes=1:centos6
+sed 's/_Celeg_TT_arrow_pilon//g' /export/home/jmi45g/Hcont_Snp_diversity/Hcon_chr_1 > /export/home/jmi45g/Hcont_Snp_diversity/bp2_MAPQ20.UGA_ISE.mpileup2.bed
+
+
+
+
 #!/bin/sh
 #PBS -l walltime=50:00:00
 #PBS -l cput=50:00:00
