@@ -210,6 +210,7 @@ sed 's/_Celeg_TT_arrow_pilon//g' /export/home/jmi45g/Hcont_Snp_diversity/Hcon_ch
 #PBS -l nodes=1:centos6
 bedtools intersect -a /export/home/jmi45g/Hcont_Snp_diversity/bp2_MAPQ20.UGA_ISE.mpileup2.bed -b /export/home/jmi45g/Hcont_Snp_diversity/gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS15.annotations.bed -wa -wb -f 2E-9 > /export/home/jmi45g/Hcont_Snp_diversity/CDS_WBPS15_bp2_MAPQ20.UGA_ISE.mpileup2.bed
 
+# All fine - it merged no problem, but note that there is no mt_DNA in it. 
 
 # To change this back into an mpileup file for popoolation2:
 # Note, am removing the gene file info and ALSO the second bp column!! 
@@ -277,12 +278,114 @@ awk '{print $1 "\t" $2 "\t" $3 "\t" $5}' /export/home/jmi45g/Hcont_Snp_diversity
 #PBS -l cput=50:00:00
 #PBS -l nodes=1:centos6
 perl /export/home/jmi45g/popoolation2_1201/snp-frequency-diff.pl \
---input /export/home/jmi45g/Hcont_Snp_diversity/UGA_CDS_bp2_MAPQ20.UGA_ISE.noindels.java.sync \
---output-prefix /export/home/jmi45g/Hcont_Snp_diversity/UGA_CDS_MAPQ20. \
+--input /export/home/jmi45g/Hcont_Snp_diversity/UGA_CDS_WBPS15_bp2_MAPQ20.UGA_ISE.noindels.java.sync \
+--output-prefix /export/home/jmi45g/Hcont_Snp_diversity/UGA_CDS_WBPS15_MAPQ20. \
 --min-count 2 \
 --min-coverage 10 \
 --max-coverage 2%
 
+#Result: '--max-coverage 2%' is equivalent to 
+
+
+#!/bin/sh
+#PBS -l walltime=30:00:00
+#PBS -l cput=50:00:00
+#PBS -l nodes=1:centos6
+perl /export/home/jmi45g/popoolation2_1201/snp-frequency-diff.pl \
+--input /export/home/jmi45g/Hcont_Snp_diversity/ISE_CDS_WBPS15_bp2_MAPQ20.UGA_ISE.noindels.java.sync \
+--output-prefix /export/home/jmi45g/Hcont_Snp_diversity/ISE_CDS_WBPS15_MAPQ20. \
+--min-count 2 \
+--min-coverage 10 \
+--max-coverage 2%
+
+# Result: 
+
+# To get biallelic sites only: 
+
+awk '$4 == 2' UGA_CDS_WBPS15_MAPQ20._rc > biallelic_UGA_CDS_WBPS15_MAPQ20._rc
+awk '$4 == 2' ISE_CDS_WBPS15_MAPQ20._rc > biallelic_ISE_CDS_WBPS15_MAPQ20._rc
+
+
+########################################################################################################################
+##### MAPQ WBPS15 20 UGA ######################################################################################################
+
+# Then in R v 3.3.3 (2017-03-06) -- "Another Canoe"
+
+af<-read.table("biallelic_UGA_CDS_WBPS15_MAPQ20._rc", header=F, sep="\t", na.strings="")
+summary(af)
+
+>  V1               V2           V3               V4          V5
+ 1:377853   Min.   :    2379   A:467482   Min.   :2   G/A    :349255
+ 2:300277   1st Qu.:10387541   C:451939   1st Qu.:2   C/T    :347958
+ 3:365262   Median :24633377   G:453036   Median :2   T/C    :343963
+ 4:351117   Mean   :24004467   T:467070   Mean   :2   A/G    :343766
+ 5:330512   3rd Qu.:37243744              3rd Qu.:2   A/T    : 77055
+ X:114506   Max.   :51822498              Max.   :2   T/A    : 76503
+                                                      (Other):301027
+       V6         V7          V8         V9              V10
+ Min.   :0   pop   :1578641   A:469511   A:485261   81/83  :   4329
+ 1st Qu.:0   rc    :     58   C:450250   C:435310   88/90  :   4238
+ Median :0   rc|pop: 260828   G:451357   G:434498   84/86  :   4231
+ Mean   :0                    T:468409   T:484458   85/87  :   4218
+ 3rd Qu.:0                                          90/92  :   4217
+ Max.   :0                                          86/88  :   4213
+                                                    (Other):1814081
+      V11
+ 2/83   :   4460
+ 2/87   :   4356
+ 2/90   :   4350
+ 2/86   :   4346
+ 2/88   :   4341
+ 2/94   :   4323
+ (Other):1813351
+
+
+# To make the major and minor allele frequencies numerical and not factors...
+
+# So, first:
+af$V10<-as.character(af$V10)
+af$V10<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V10, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V10, perl=T) ) 
+
+af$V11<-as.character(af$V11)
+af$V11<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V11, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V11, perl=T) ) 
+
+summary(af)
+
+> > > > > > > > > > > >  V1               V2           V3               V4          V5
+ 1:377853   Min.   :    2379   A:467482   Min.   :2   G/A    :349255
+ 2:300277   1st Qu.:10387541   C:451939   1st Qu.:2   C/T    :347958
+ 3:365262   Median :24633377   G:453036   Median :2   T/C    :343963
+ 4:351117   Mean   :24004467   T:467070   Mean   :2   A/G    :343766
+ 5:330512   3rd Qu.:37243744              3rd Qu.:2   A/T    : 77055
+ X:114506   Max.   :51822498              Max.   :2   T/A    : 76503
+                                                      (Other):301027
+       V6         V7          V8         V9              V10
+ Min.   :0   pop   :1578641   A:469511   A:485261   Min.   :0.4545
+ 1st Qu.:0   rc    :     58   C:450250   C:435310   1st Qu.:0.7356
+ Median :0   rc|pop: 260828   G:451357   G:434498   Median :0.8800
+ Mean   :0                    T:468409   T:484458   Mean   :0.8313
+ 3rd Qu.:0                                          3rd Qu.:0.9487
+ Max.   :0                                          Max.   :0.9850
+
+      V11
+ Min.   :0.01504
+ 1st Qu.:0.05085
+ Median :0.11927
+ Mean   :0.16832
+ 3rd Qu.:0.26389
+ Max.   :0.50000
+
+
+# To put headers on the columns....
+
+af$"UGA:MajorAF"<-af$V10
+af$"UGA:MinorAF"<-af$V11
+
+write.table(af,"UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt",quote = FALSE,row.names = FALSE,sep = "\t")
+
+## To reduce the file size remove the unwanted columns!
+
+awk '{print $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9 "\t" $12 "\t" $13}' UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt > B_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt
 
 
 
