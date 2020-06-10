@@ -656,9 +656,75 @@ sed 's/-00001//g' SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20 > B_SNP_RATE_IS
 mv B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20 SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20
 
 
+# Then to merge with Roz DESEQ data:
+
+# First have to remove the header line pf Roz's file, also removed the end line (in excel - had an incomplete line of totals):
+
+sort $1 summary_DESEQ_WBPS15gff_alpha0.01_males_all3IVMcomps.txt > Sorted.summary_DESEQ_WBPS15gff_alpha0.01_males_all3IVMcomps.txt
+
+./list.join2List.pl SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20 Sorted.summary_DESEQ_WBPS15gff_alpha0.01_males_all3IVMcomps.txt > summary_DESEQ_WBPS15gff_alpha0.01_males_all3IVMcomps_CDS_SNP_RATE_ISE_then_UGA_WBPS15_MAPQ20.txt
 
 
+# In R:
+R version 3.3.3 (2017-03-06) -- "Another Canoe"
+
+t<-read.table("summary_DESEQ_WBPS15gff_alpha0.01_males_all3IVMcomps_CDS_SNP_RATE_ISE_then_UGA_WBPS15_MAPQ20.txt", header=F)
+summary(t)
+             V1              V2              V3                V4
+ HCON_00000020:    1   Min.   :    2   Min.   :  1.000   Min.   :   1.00
+ HCON_00000030:    1   1st Qu.:  494   1st Qu.:  3.000   1st Qu.:   4.00
+ HCON_00000040:    1   Median :  926   Median :  7.000   Median :  13.00
+ HCON_00000050:    1   Mean   : 1221   Mean   :  8.892   Mean   :  24.74
+ HCON_00000060:    1   3rd Qu.: 1516   3rd Qu.: 12.000   3rd Qu.:  30.00
+ HCON_00000070:    1   Max.   :22837   Max.   :138.000   Max.   :1099.00
+ (Other)      :21233                                     NA's   :6258
+       V5                 V6                V7                       V8
+ Min.   :0.000000   Min.   :   1.00   Min.   :0.000000   HCON_00000020:    1
+ 1st Qu.:0.000000   1st Qu.:   5.00   1st Qu.:0.001912   HCON_00000030:    1
+ Median :0.006696   Median :  14.00   Median :0.011499   HCON_00000040:    1
+ Mean   :0.013494   Mean   :  25.26   Mean   :0.015707   HCON_00000050:    1
+ 3rd Qu.:0.021497   3rd Qu.:  31.00   3rd Qu.:0.023850   HCON_00000060:    1
+ Max.   :0.207792   Max.   :1018.00   Max.   :0.189702   (Other)      :19656
+                    NA's   :4161                         NA's         : 1578
+       V9                 V10                V11              V12
+ Min.   :      0.0   Min.   :-10.0802   Min.   :0.0466   Min.   :-28.5693
+ 1st Qu.:      5.8   1st Qu.: -0.4978   1st Qu.:0.1258   1st Qu.: -1.4016
+ Median :    176.6   Median :  0.0000   Median :0.2311   Median :  0.0000
+ Mean   :   2173.6   Mean   : -0.0859   Mean   :0.9011   Mean   : -0.0635
+ 3rd Qu.:   1053.1   3rd Qu.:  0.3301   3rd Qu.:0.9332   3rd Qu.:  1.3318
+ Max.   :1352821.3   Max.   : 11.8382   Max.   :4.8568   Max.   : 24.6581
+ NA's   :1578        NA's   :2497       NA's   :2497     NA's   :2497
+      V13              V14                   V15             V16
+ Min.   :0.0000   Min.   :0.000   HCON_00000020:    1   Min.   :      0.0
+ 1st Qu.:0.0050   1st Qu.:0.005   HCON_00000030:    1   1st Qu.:      5.8
+ Median :0.1701   Median :0.166   HCON_00000040:    1   Median :    176.6
+ Mean   :0.3175   Mean   :0.304   HCON_00000050:    1   Mean   :   2173.6
+ 3rd Qu.:0.6000   3rd Qu.:0.579   HCON_00000060:    1   3rd Qu.:   1053.1
+ Max.   :1.0000   Max.   :1.000   (Other)      :19656   Max.   :1352821.3
+ NA's   :2527     NA's   :5801    NA's         : 1578   NA's   :1578
+      V17               V18              V19                V20
+ Min.   :-8.9181   Min.   :0.0466   Min.   :-21.7371   Min.   :0.0000
+ 1st Qu.:-0.2456   1st Qu.:0.1245   1st Qu.: -0.8843   1st Qu.:0.0397
+ Median : 0.0222   Median :0.2265   Median :  0.0941   Median :0.3112
+ Mean   : 0.1469   Mean   :0.8714   Mean   :  0.1389   Mean   :0.3786
+ 3rd Qu.: 0.3852   3rd Qu.:0.8584   3rd Qu.:  1.1086   3rd Qu.:0.6766
+ Max.   : 7.9698   Max.   :4.8568   Max.   : 13.2452   Max.   :1.0000
+ NA's   :2497      NA's   :2497     NA's   :2497       NA's   :2527
+      V21                   V22             V23                 V24
+ Min.   :0.000   HCON_00000020:    1   Min.   :      0.0   Min.   :-6.1910
+ 1st Qu.:0.066   HCON_00000030:    1   1st Qu.:      5.8   1st Qu.:-0.2639
+ Median :0.405   HCON_00000040:    1   Median :    176.6   Median : 0.0147
+ Mean   :0.426   HCON_00000050:    1   Mean   :   2173.6   Mean   : 0.1769
+ 3rd Qu.:0.748   HCON_00000060:    1   3rd Qu.:   1053.1   3rd Qu.: 0.3901
+ Max.   :1.000   (Other)      :19656   Max.   :1352821.3   Max.   : 8.4640
+ NA's   :6520    NA's         : 1578   NA's   :1578        NA's   :2497
+      V25              V26                V27              V28
+ Min.   :0.0466   Min.   :-26.8272   Min.   :0.0000   Min.   :0.000
+ 1st Qu.:0.1251   1st Qu.: -1.0184   1st Qu.:0.0296   1st Qu.:0.056
+ Median :0.2275   Median :  0.0680   Median :0.2720   Median :0.355
+ Mean   :0.8802   Mean   :  0.0116   Mean   :0.3596   Mean   :0.403
+ 3rd Qu.:0.8818   3rd Qu.:  1.1565   3rd Qu.:0.6492   3rd Qu.:0.722
+ Max.   :4.8568   Max.   : 18.3949   Max.   :1.0000   Max.   :1.000
+ NA's   :2497     NA's   :2497       NA's   :2527     NA's   :5801
 
 
-
-# 830
