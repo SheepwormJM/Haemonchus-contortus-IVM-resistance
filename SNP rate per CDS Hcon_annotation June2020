@@ -625,6 +625,39 @@ Therefore:
 
 awk '{print $1 "\t" $ 2 "\t" $3 "\t" $5 "\t" ($5/$2)}' ISE_WBPS15_MAPQ20_SNP_CDS_0.4 > SNP_RATE_ISE_WBPS15_MAPQ20_SNP_CDS_0.4
 
+###### PERFECT!! ######
+
+##### To merge the UGA and ISE SNP_RATE files ######
+
+./list.join2List.pl SNP_RATE_ISE_WBPS15_MAPQ20_SNP_CDS_0.4 SNP_RATE_UGA_WBPS15_MAPQ20_SNP_CDS_0.4 > SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20
+
+# Worked fine:
+
+awk '{print $1 "\t" $ 2 "\t" $3 "\t" $4 "\t" $5 "\t" "\t" $9 "\t" $10}' SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20 > B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20
+mv B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20 SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20
+
+# Col 1 = Gene name
+# Col 2 = Sum of sites
+# Col 3 = Sum of exons
+# Col 4 = ISE SNP count
+# Col 5 = ISE CDS SNP rate (SNP count/Sum of sites)
+# Col 6 = UGA SNP count
+# Col 7 = UGA CDS SNP rate (SNP count/Sum of sites)
+
+
+#######################################################################################################################################
+####### To merge with DE-Seq data #####################################################################################################
+
+# Note, to combine with Roz's DESEQ data need to remove the -00001 from gene names!! 
+
+sed 's/-00001//g' SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20 > B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20
+
+# All good. Will re-name the file: 
+mv B_SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20 SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20
+
+
+
+
 
 
 
