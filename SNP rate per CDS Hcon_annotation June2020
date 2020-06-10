@@ -387,6 +387,244 @@ write.table(af,"UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt",quote = FALSE,row.names
 
 awk '{print $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9 "\t" $12 "\t" $13}' UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt > B_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt
 
+## We want SNPs relative to the reference of >0.4 frequency in the population.
+## So, have it such that have pop changes, with the major allele the same as the reference allele and rc|pop changes with the minor 
+## allele the same as the reference allele.
+## So, to select just the rc|pop and then to take those with the major allele > 0.4. 
+
+find . -name "B_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt" | xargs grep -E 'rc' > ALT_RC_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt
+
+awk '$10 >0.4' ALT_RC_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt > 0.4_ALT_RC_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt
+# Note, the above line may be fairly pointless to run as the major allele is going to be >/=0.5 anyway.... however.
+
+## Then to get when the minor allele is >0.4. 
+
+find . -name "B_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt" | xargs grep -v 'rc' > SAME_RA_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt
+
+awk '$11 >0.4' SAME_RA_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt > 0.4_SAME_RA_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt
+
+# Great, so now have, for UGA MAPQ20, all the sites with a SNP allele different to the reference sequence with an allele frequency 
+# of >0.4.
+
+cat 0.4_SAME_RA_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt 0.4_ALT_RC_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt > all_0.4_UGA_WBPS15_MAPQ20_AF
+
+# Looks good - has the rc below the pop
+
+wc -l *0.4*
+# Old transcriptome:
+  230350 0.4_ALT_RC_UGA_MAPQ20_biallelic_AF_freq.txt
+   88549 0.4_SAME_RA_UGA_MAPQ20_biallelic_AF_freq.txt
+  318899 all_0.4_UGA_MAPQ20_AF
+
+# New transcriptome:
+  260886 0.4_ALT_RC_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt
+   99468 0.4_SAME_RA_UGA_WBPS15_MAPQ20_biallelic_AF_freq.txt
+  360354 all_0.4_UGA_WBPS15_MAPQ20_AF
+
+
+# Need to make the file into a bed file to merge with the genes file. 
+
+awk '{print $1 "\t" ($2-1) "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9 "\t" $10 "\t" $11}' all_0.4_UGA_WBPS15_MAPQ20_AF > all_0.4_UGA_WBPS15_MAPQ20_AF.bed
+
+# Great - remember that the SNP is the THIRD column of the file!!! 
+
+# To remove the header line....
+
+find . -name "all_0.4_UGA_WBPS15_MAPQ20_AF.bed" | xargs grep -v 'V' > B_all_0.4_UGA_WBPS15_MAPQ20_AF.bed
+mv B_all_0.4_UGA_WBPS15_MAPQ20_AF.bed all_0.4_UGA_WBPS15_MAPQ20_AF.bed
+
+
+# Ok, so now have a file with all the SNPs of UGA cf the reference, with AF >0.4 and a file with all the CDS of all the genes. 
+# To intersect these two files. 
+
+bedtools intersect -a all_0.4_UGA_WBPS15_MAPQ20_AF.bed -b gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS15.annotations.bed -wa -wb -f 2E-9 > CDS_all_0.4_UGA_WBPS15_MAPQ20_AF.bed
+
+# Great. So to now try to count the number of SNPs per gene.... 
+
+awk -F "\t" '{a[$17] += $5; ++c[$17]} END{for (i in a) print i, a[i], c[i]}' CDS_all_0.4_UGA_WBPS15_MAPQ20_AF.bed > SNP_NUMBER_CDS_all_0.4_UGA_WBPS15_MAPQ20_AF
+
+# Perfect. (the first col = gene name, the next = sum of the SNP count col..... ie. as biallelic this is double the actual number of SNPs, and the third col is the number of SNPs. 
+
+# To make into a better file: 
+
+awk '{print $1 "\t" $3}' SNP_NUMBER_CDS_all_0.4_UGA_WBPS15_MAPQ20_AF > SNP_COUNT_CDS_all_0.4_UGA_WBPS15_MAPQ20_AF
+
+sort $1 SNP_COUNT_CDS_all_0.4_UGA_WBPS15_MAPQ20_AF > Sorted_SNP_COUNT_CDS_all_0.4_UGA_WBPS15_MAPQ20_AF
+
+sort $1 SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS15.annotations.gff3 > Sorted_SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS15.annotations.gff3
+
+# Note, the SUM.gene file is delimited by white space. Need it to be tab delimited.... 
+
+awk -v OFS='\t' '{ $1=$1; print }' Sorted_SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS15.annotations.gff3 > Sorted_SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS15.annotations.gff3_Tab
+
+# To combine the SNP total per CDS  and the length of the CDS:
+
+./list.join2List.pl Sorted_SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS15.annotations.gff3_Tab Sorted_SNP_COUNT_CDS_all_0.4_UGA_WBPS15_MAPQ20_AF > UGA_WBPS15_MAPQ20_SNP_CDS_0.4
+
+# So... to calculate the SNP RATE per CDS (SNP count/TOTAL sites)
+# Col 1 = Gene name
+# Col 2 = Sum of sites
+# Col 3 = Sum of exons
+# Col 4 = Gene name
+# Col 5 = Sum of SNPs
+
+Therefore:
+
+awk '{print $1 "\t" $ 2 "\t" $3 "\t" $5 "\t" ($5/$2)}' UGA_WBPS15_MAPQ20_SNP_CDS_0.4 > SNP_RATE_UGA_WBPS15_MAPQ20_SNP_CDS_0.4
+
+
+################################################################################################################################
+####### ISE - MAPQ20 ##########################################################################################################
+
+af<-read.table("biallelic_ISE_CDS_WBPS15_MAPQ20._rc", header=F, sep="\t", na.strings="")
+summary(af)
+
+  V1               V2           V3               V4          V5
+ 1:269916   Min.   :    2379   A:320377   Min.   :2   G/A    :235022
+ 2:197909   1st Qu.:10364182   C:308485   1st Qu.:2   C/T    :234624
+ 3:263073   Median :24041981   G:308840   Median :2   T/C    :232833
+ 4:242748   Mean   :23847734   T:320504   Mean   :2   A/G    :232190
+ 5:214049   3rd Qu.:37141130              3rd Qu.:2   A/T    : 54161
+ X: 70511   Max.   :51822498              Max.   :2   T/A    : 53782
+                                                      (Other):215594
+       V6         V7          V8         V9              V10
+ Min.   :0   pop   :1039540   A:322471   A:330081   83/85  :   1619
+ 1st Qu.:0   rc    :     21   C:306673   C:299781   85/87  :   1595
+ Median :0   rc|pop: 218645   G:307143   G:298266   92/94  :   1588
+ Mean   :0                    T:321919   T:330078   82/84  :   1582
+ 3rd Qu.:0                                          79/81  :   1581
+ Max.   :0                                          87/89  :   1574
+                                                    (Other):1248667
+      V11
+ 2/85   :   1653
+ 2/87   :   1631
+ 2/94   :   1625
+ 2/81   :   1616
+ 2/84   :   1610
+ 2/89   :   1609
+ (Other):1248462
+
+
+
+# To make the major and minor allele frequencies numerical and not factors...
+
+# So, first:
+af$V10<-as.character(af$V10)
+af$V10<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V10, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V10, perl=T) ) 
+
+af$V11<-as.character(af$V11)
+af$V11<-as.numeric( gsub("(\\d+)/(\\d+)", "\\1", af$V11, perl=T) ) / as.numeric ( gsub("(\\d+)/(\\d+)", "\\2", af$V11, perl=T) ) 
+
+summary(af)
+af$"ISE:MajorAF"<-af$V10
+af$"ISE:MinorAF"<-af$V11
+
+ V1               V2           V3               V4          V5
+ 1:269916   Min.   :    2379   A:320377   Min.   :2   G/A    :235022
+ 2:197909   1st Qu.:10364182   C:308485   1st Qu.:2   C/T    :234624
+ 3:263073   Median :24041981   G:308840   Median :2   T/C    :232833
+ 4:242748   Mean   :23847734   T:320504   Mean   :2   A/G    :232190
+ 5:214049   3rd Qu.:37141130              3rd Qu.:2   A/T    : 54161
+ X: 70511   Max.   :51822498              Max.   :2   T/A    : 53782
+                                                      (Other):215594
+       V6         V7          V8         V9              V10
+ Min.   :0   pop   :1039540   A:322471   A:330081   Min.   :0.4545
+ 1st Qu.:0   rc    :     21   C:306673   C:299781   1st Qu.:0.6857
+ Median :0   rc|pop: 218645   G:307143   G:298266   Median :0.8293
+ Mean   :0                    T:321919   T:330078   Mean   :0.7978
+ 3rd Qu.:0                                          3rd Qu.:0.9231
+ Max.   :0                                          Max.   :0.9846
+
+      V11           ISE:MajorAF      ISE:MinorAF
+ Min.   :0.01538   Min.   :0.4545   Min.   :0.01538
+ 1st Qu.:0.07692   1st Qu.:0.6857   1st Qu.:0.07692
+ Median :0.17045   Median :0.8293   Median :0.17045
+ Mean   :0.20203   Mean   :0.7978   Mean   :0.20203
+ 3rd Qu.:0.31395   3rd Qu.:0.9231   3rd Qu.:0.31395
+ Max.   :0.50000   Max.   :0.9846   Max.   :0.50000
+
+
+
+write.table(af,"ISE_WBPS15_biallelic_AF_freq.txt",quote = FALSE,row.names = FALSE,sep = "\t")
+
+
+## To reduce the file size remove the unwanted columns!
+
+awk '{print $1 "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9 "\t" $12 "\t" $13}' ISE_WBPS15_biallelic_AF_freq.txt > B_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt
+
+## So, have it such that have pop changes, with the major allele the same as the reference allele and rc|pop changes with the minor allele the same as the reference allele.
+## So, to select just hte rc|pop and then to take those with the major allele > 0.4. 
+
+find . -name "B_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt" | xargs grep -E 'rc' > ALT_RC_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt
+
+awk '$10 >0.4' ALT_RC_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt > 0.4_ALT_RC_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt
+
+## Then to get when the minor allele is >0.4. 
+
+find . -name "B_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt" | xargs grep -v 'rc' > SAME_RA_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt
+
+awk '$11 >0.4' SAME_RA_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt > 0.4_SAME_RA_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt
+
+# Great, so now have, for ISE MAPQ20, all the sites with a SNP allele different to the reference sequence with an allele frequency of >0.4.
+
+cat 0.4_SAME_RA_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt 0.4_ALT_RC_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt > all_0.4_ISE_WBPS15_MAPQ20_AF
+
+# Looks good - has the rc below the pop
+
+wc -l *0.4*ISE*
+# Old transcriptome:
+  192396 0.4_ALT_RC_ISE_MAPQ20_biallelic_AF_freq.txt
+   80929 0.4_SAME_RA_ISE_MAPQ20_biallelic_AF_freq.txt
+  273325 all_0.4_ISE_MAPQ20_AF
+
+# New transcriptome:
+  218666 0.4_ALT_RC_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt
+   91595 0.4_SAME_RA_ISE_WBPS15_MAPQ20_biallelic_AF_freq.txt
+  310261 all_0.4_ISE_WBPS15_MAPQ20_AF
+
+# Need to make the file into a bed file to merge with the genes file. 
+
+awk '{print $1 "\t" ($2-1) "\t" $2 "\t" $3 "\t" $4 "\t" $5 "\t" $6 "\t" $7 "\t" $8 "\t" $9 "\t" $10 "\t" $11}' all_0.4_ISE_WBPS15_MAPQ20_AF > all_0.4_ISE_WBPS15_MAPQ20_AF.bed
+
+# Great - remember that the SNP is the THIRD column of the file!!! 
+
+# To remove the header line....
+
+find . -name "all_0.4_ISE_WBPS15_MAPQ20_AF.bed" | xargs grep -v 'V' > B_all_0.4_ISE_WBPS15_MAPQ20_AF.bed
+mv B_all_0.4_ISE_WBPS15_MAPQ20_AF.bed all_0.4_ISE_WBPS15_MAPQ20_AF.bed
+
+
+# Ok, so now have a file with all the SNPs of ISE cf the reference, with AF >0.4 and a file with all the CDS of all the genes. 
+# To intersect these two files. 
+
+bedtools intersect -a all_0.4_ISE_WBPS15_MAPQ20_AF.bed -b gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS15.annotations.bed -wa -wb -f 2E-9 > CDS_all_0.4_ISE_WBPS15_MAPQ20_AF.bed
+
+# Great. So to now try to count the number of SNPs per gene.... 
+
+awk -F "\t" '{a[$17] += $5; ++c[$17]} END{for (i in a) print i, a[i], c[i]}' CDS_all_0.4_ISE_WBPS15_MAPQ20_AF.bed > SNP_NUMBER_CDS_all_0.4_ISE_WBPS15_MAPQ20_AF
+
+# Perfect. (the first col = gene name, the next = sum of the SNP count col..... ie. as biallelic this is double the actual number of SNPs, and the third col is the number of SNPs. 
+
+# To make into a better file: 
+
+awk '{print $1 "\t" $3}' SNP_NUMBER_CDS_all_0.4_ISE_WBPS15_MAPQ20_AF > SNP_COUNT_CDS_all_0.4_ISE_WBPS15_MAPQ20_AF
+
+sort $1 SNP_COUNT_CDS_all_0.4_ISE_WBPS15_MAPQ20_AF > Sorted_SNP_COUNT_CDS_all_0.4_ISE_WBPS15_MAPQ20_AF
+
+
+./list.join2List.pl Sorted_SUM.gene.length.CDS.T1.haemonchus_contortus.PRJEB506.WBPS15.annotations.gff3_Tab Sorted_SNP_COUNT_CDS_all_0.4_ISE_WBPS15_MAPQ20_AF > ISE_WBPS15_MAPQ20_SNP_CDS_0.4
+
+# So... to calculate the SNP RATE per CDS (SNP count/TOTAL sites)
+# Col 1 = Gene name
+# Col 2 = Sum of sites
+# Col 3 = Sum of exons
+# Col 4 = Gene name
+# Col 5 = Sum of SNPs
+
+Therefore:
+
+awk '{print $1 "\t" $ 2 "\t" $3 "\t" $5 "\t" ($5/$2)}' ISE_WBPS15_MAPQ20_SNP_CDS_0.4 > SNP_RATE_ISE_WBPS15_MAPQ20_SNP_CDS_0.4
+
 
 
 
