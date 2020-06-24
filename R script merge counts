@@ -1,0 +1,36 @@
+getwd()
+setwd("C:/Users/jenni/Documents/Working from home Mar 2020/BUG/From Ali/")
+
+# L1 = a, b, c
+# ShL3 = d,e,f
+
+a<-read.table("Galaxy62-[L1_ERS209879_count].tabular", header=F)
+b<-read.table("Galaxy64-[L1_ERS209880_count].tabular", header=F)
+c<-read.table("Galaxy66-[L1_ERS209881_count].tabular", header=F)
+
+d<-read.table("Galaxy21-[Sheathed_L3_ERS092633_count].tabular", header = F)
+e<-read.table("Galaxy22-[Sheathed_L3_ERS092634_count].tabular", header = F)
+f<-read.table("Galaxy23-[Sheathed_L3_ERS092635_count].tabular", header = F)
+
+summary(a)
+summary(b)
+summary(c)
+summary(d)
+summary(e)
+summary(f)
+
+# All loaded ok
+
+# To merge L1 data and then L3 data by gene name:
+
+tmp<-merge(a,b, by="V1")
+L1<-merge(tmp, c, by="V1")
+names(L1)<-c("Gene", "L1_ERS209879_count", "L1_ERS209880_count", "L1_ERS209881_count")
+summary(L1)
+write.table(L1, "L1_featureCount_WBPS14.txt", sep="\t", quote=FALSE)
+
+tmp<-merge(d,e, by="V1")
+L3<-merge(tmp, f, by="V1")
+names(L3)<-c("Gene", "Sheathed_L3_ERS092633_count", "Sheathed_L3_ERS092634_count", "Sheathed_L3_ERS092635_count")
+summary(L3)
+write.table(L3, "L3_featureCount_WBPS14.txt", sep="\t", quote=FALSE)
