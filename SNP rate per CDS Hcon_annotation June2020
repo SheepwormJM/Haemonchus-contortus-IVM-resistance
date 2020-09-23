@@ -728,3 +728,22 @@ summary(t)
  NA's   :2497     NA's   :2497       NA's   :2527     NA's   :5801
 
 
+#######################################################################################################################################
+####### To merge with FEMALE DE-Seq data #####################################################################################################
+
+# 23.09.20
+
+# To merge with the female DESEQ data. 
+# Excel is currently not working. So to try loading as sent and see what happens.
+
+
+# First have to remove the header line pf Roz's file - did this in nano.
+
+# For some reason all of Roz's gene names have "gene_name". So need to remove this!
+
+sed 's/"//g' summary_DESEQ_WBSP15_alpha0.01_females.txt > Changed.summary_DESEQ_WBSP15_alpha0.01_females.txt
+
+sort $1 Changed.summary_DESEQ_WBSP15_alpha0.01_females.txt > Sorted.summary_DESEQ_WBSP15_alpha0.01_females.txt
+
+./list.join2List.pl SNP_RATE_ISE_AND_UGA_SNP_CDS_0.4_WBPS15_MAPQ20 Sorted.summary_DESEQ_WBSP15_alpha0.01_females.txt > summary_DESEQ_WBSP15_alpha0.01_females_CDS_SNP_RATE_ISE_then_UGA_WBPS15_MAPQ20.txt
+
