@@ -34,3 +34,48 @@ L3<-merge(tmp, f, by="V1")
 names(L3)<-c("Gene", "Sheathed_L3_ERS092633_count", "Sheathed_L3_ERS092634_count", "Sheathed_L3_ERS092635_count")
 summary(L3)
 write.table(L3, "L3_featureCount_WBPS14.txt", sep="\t", quote=FALSE)
+
+# To merge RNAi genes and L1/L3 counts:
+
+getwd()
+setwd("C:/Users/jenni/Documents/Working from home Mar 2020/BUG/From Ali/")
+
+a<-read.table("L1_featureCount_WBPS14.txt", sep="\t", header = T)
+b<-read.table("L3_featureCount_WBPS14.txt", sep="\t", header = T)
+
+summary(a)
+summary(b)
+
+tmp<-merge(a,b, by="Gene")
+summary(tmp)
+
+# Load list of Hcon homologues of Cele RNAi genes:
+
+setwd("C:/Users/jenni/Documents/Working from home Mar 2020/BUG/RNAi (excl. qPCRs)/")
+
+c<-read.table("RNAi genes Cele Hcon.txt", sep="\t", header = T)
+summary(c)
+
+RNAi<-merge(c,tmp, by="Gene")
+summary(RNAi)
+
+# Great. Notice that one Hcon gene is in 3 times, and another in twice. 
+write.table(RNAi, "RNAi Cele genes Hcon homologues feature counts from Ali.txt", sep="\t", quote=FALSE)
+
+library(ggplot2)
+library(reshape2)
+library(viridis)
+new_RNAi<-melt(RNAi)
+## Using Gene, Cele_gene, Present_in_Hcon_protein.fa. as id variables
+x<-ggplot(data=new_RNAi)+
+geom_col(aes(x=Cele_gene, y=value, fill=variable), position = "dodge")+
+theme (axis.text.x = element_text (angle = 45))+
+scale_fill_viridis(direction=1, option="E", alpha=0.6, discrete=T)+
+labs(x = "C. elegans gene name", y = "H. contortus RNA-Seq Feature Count", caption = "Data source: Feature count from Ali", tag = "A", fill = "Lifecycle stage", subtitle="*ego-1, rrf-1 and rrf-3 all have same Hcon homologue\n*alg-1 and alg-2 have same Hcon homologue")
+x
+
+
+
+
+
+
